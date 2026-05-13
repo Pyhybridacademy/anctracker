@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{% if site_settings %}{{ site_settings.company_name }}{% else %}Global Logistics{% endif %}{% endblock %}</title>
+
+  <!-- Bootstrap (keep for grid/utilities) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+  <style>
+  /* ════════════════════════════════════════════════════
+     DESIGN TOKENS — identical to home page
+  ════════════════════════════════════════════════════ */
+  :root {
+    --navy:    #0A1628;
+    --blue:    #1346A0;
+    --blue-lt: #1E5FBF;
+    --accent:  #F97316;
+    --steel:   #E8EDF5;
+    --gray:    #64748B;
+    --border:  #D1D9E8;
+    --warm:    #F8FAFC;
+    --fs: 'Syne', sans-serif;
+    --fb: 'Inter', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--fb); background: var(--warm);
+    color: var(--navy); font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    /* Push footer to bottom */
+    display: flex; flex-direction: column; min-height: 100vh;
+  }
+  main { flex: 1; }
+
+  /* ════════════════════════════════════════════════════
+     NAVBAR
+  ════════════════════════════════════════════════════ */
+  .sc-navbar {
+    background: var(--navy);
+    border-bottom: 1px solid rgba(255,255,255,.06);
+    padding: 0;
+    position: sticky; top: 0; z-index: 1000;
+    transition: box-shadow .3s ease;
+  }
+  .sc-navbar.scrolled {
+    box-shadow: 0 4px 32px rgba(10,22,40,.5);
+  }
+
+  /* Top utility bar */
+  .nav-topbar {
+    background: rgba(255,255,255,.03);
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    padding: 6px 0;
+  }
+  .nav-topbar-inner {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 8px;
+  }
+  .nav-topbar-left, .nav-topbar-right {
+    display: flex; align-items: center; gap: 20px;
+    flex-wrap: wrap;
+  }
+  .nav-topbar-item {
+    font-size: .7rem; color: rgba(255,255,255,.38);
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--fb); text-decoration: none;
+    transition: color .2s;
+  }
+  .nav-topbar-item i { color: var(--accent); font-size: .68rem; }
+  .nav-topbar-item:hover { color: rgba(255,255,255,.7); }
+  .nav-topbar-divider {
+    width: 1px; height: 12px; background: rgba(255,255,255,.1);
+  }
+
+  /* Main nav row */
+  .nav-main-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0; height: 68px; gap: 24px;
+  }
+
+  /* Brand */
+  .nav-brand {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none; flex-shrink: 0;
+  }
+  .nav-brand-logo {
+    width: 38px; height: 38px; background: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .nav-brand-logo i { color: #fff; font-size: 1rem; }
+  .nav-brand img { max-height: 38px; width: auto; display: block; }
+  .nav-brand-text { line-height: 1; }
+  .nav-brand-name {
+    font-family: var(--fs); font-size: .92rem; font-weight: 800;
+    color: #fff; display: block; letter-spacing: -.01em;
+  }
+  .nav-brand-tagline {
+    font-size: .58rem; letter-spacing: .18em; text-transform: uppercase;
+    color: rgba(255,255,255,.28); display: block; margin-top: 2px;
+  }
+
+  /* Nav links */
+  .nav-links {
+    display: flex; align-items: center; gap: 2px;
+    list-style: none; margin: 0; padding: 0;
+  }
+  .nav-links > li { position: relative; }
+  .nav-link-item {
+    font-family: var(--fs); font-size: .72rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(255,255,255,.55); text-decoration: none;
+    padding: 8px 14px; display: flex; align-items: center; gap: 5px;
+    transition: color .2s; white-space: nowrap;
+    border-bottom: 2px solid transparent;
+  }
+  .nav-link-item:hover, .nav-link-item.active {
+    color: #fff; border-bottom-color: var(--accent);
+  }
+  .nav-link-item i { font-size: .6rem; opacity: .6; transition: transform .25s; }
+  .nav-links > li:hover .nav-link-item i { transform: rotate(180deg); }
+
+  /* Dropdown */
+  .nav-dropdown {
+    position: absolute; top: calc(100% + 8px); left: 0;
+    background: var(--navy); border: 1px solid rgba(255,255,255,.08);
+    min-width: 210px; list-style: none; padding: 6px 0;
+    opacity: 0; visibility: hidden; transform: translateY(8px);
+    transition: all .25s ease; z-index: 200;
+    box-shadow: 0 20px 48px rgba(10,22,40,.55);
+  }
+  .nav-links > li:hover .nav-dropdown,
+  .nav-links > li:focus-within .nav-dropdown {
+    opacity: 1; visibility: visible; transform: translateY(0);
+  }
+  .nav-dropdown li a {
+    display: flex; align-items: center; gap: 10px;
+    font-size: .75rem; font-family: var(--fb); font-weight: 400;
+    color: rgba(255,255,255,.5); padding: 10px 18px;
+    text-decoration: none; transition: all .2s;
+    border-left: 2px solid transparent;
+  }
+  .nav-dropdown li a i { color: var(--accent); font-size: .8rem; width: 14px; text-align: center; }
+  .nav-dropdown li a:hover {
+    color: #fff; background: rgba(255,255,255,.04);
+    border-left-color: var(--accent); padding-left: 22px;
+  }
+
+  /* Nav right actions */
+  .nav-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .nav-track-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--blue); color: #fff; border: none;
+    padding: 9px 20px; font-family: var(--fs); font-size: .65rem;
+    font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; cursor: pointer; transition: background .25s; white-space: nowrap;
+  }
+  .nav-track-btn:hover { background: var(--blue-lt); color: #fff; }
+
+  .nav-cta-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--accent); color: #fff; border: none;
+    padding: 9px 20px; font-family: var(--fs); font-size: .65rem;
+    font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; cursor: pointer; transition: all .25s; white-space: nowrap;
+  }
+  .nav-cta-btn:hover { background: #e06210; color: #fff; }
+
+  /* Mobile hamburger */
+  .nav-toggle {
+    display: none; background: none; border: 1px solid rgba(255,255,255,.15);
+    color: rgba(255,255,255,.7); width: 40px; height: 40px;
+    align-items: center; justify-content: center; cursor: pointer;
+    font-size: .95rem; transition: all .25s; flex-shrink: 0;
+  }
+  .nav-toggle:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Mobile drawer */
+  .nav-mobile {
+    display: none; background: var(--navy);
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding: 16px 0 24px;
+  }
+  .nav-mobile.open { display: block; }
+  .nav-mobile-link {
+    display: flex; align-items: center; justify-content: space-between;
+    font-family: var(--fs); font-size: .78rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    color: rgba(255,255,255,.55); text-decoration: none;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+    transition: color .2s;
+  }
+  .nav-mobile-link:hover, .nav-mobile-link.active { color: #fff; }
+  .nav-mobile-link i { color: var(--accent); font-size: .7rem; }
+  .nav-mobile-sub { padding-left: 16px; display: none; }
+  .nav-mobile-sub.open { display: block; }
+  .nav-mobile-sub a {
+    display: flex; align-items: center; gap: 8px;
+    font-size: .74rem; color: rgba(255,255,255,.38);
+    text-decoration: none; padding: 9px 0;
+    border-bottom: 1px solid rgba(255,255,255,.04);
+    transition: color .2s; font-family: var(--fb);
+  }
+  .nav-mobile-sub a i { color: var(--accent); font-size: .72rem; width: 12px; }
+  .nav-mobile-sub a:hover { color: rgba(255,255,255,.75); }
+  .nav-mobile-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+  .nav-mobile-actions a { flex: 1; text-align: center; min-width: 140px; }
+
+  /* ════════════════════════════════════════════════════
+     FLASH MESSAGES — matches the design system
+  ════════════════════════════════════════════════════ */
+  .messages-wrap { position: fixed; top: 76px; right: 20px; z-index: 900; width: 340px; }
+  .sc-alert {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 18px; margin-bottom: 8px;
+    border-left: 3px solid; font-size: .84rem;
+    font-family: var(--fb); animation: slide-in-right .3s ease;
+    position: relative; box-shadow: 0 8px 28px rgba(10,22,40,.15);
+  }
+  @keyframes slide-in-right {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .sc-alert-success { background: #F0FDF4; border-color: #22C55E; color: #166534; }
+  .sc-alert-error   { background: #FFF1F0; border-color: #EF4444; color: #991B1B; }
+  .sc-alert-warning { background: #FFFBEB; border-color: var(--accent); color: #92400E; }
+  .sc-alert-info    { background: #EFF6FF; border-color: var(--blue); color: #1E3A8A; }
+  .sc-alert i       { font-size: .9rem; margin-top: 1px; flex-shrink: 0; }
+  .sc-alert-close {
+    position: absolute; top: 10px; right: 12px;
+    background: none; border: none; cursor: pointer;
+    font-size: .75rem; opacity: .45; transition: opacity .2s;
+    color: inherit; padding: 0;
+  }
+  .sc-alert-close:hover { opacity: .9; }
+
+  /* ════════════════════════════════════════════════════
+     SHARED COMPONENT STYLES
+     (carried across from home page so child templates
+      can use these classes without re-declaring them)
+  ════════════════════════════════════════════════════ */
+
+  /* Section shells */
+  .section       { padding: 88px 0; }
+  .section-light { background: var(--warm); }
+  .section-steel { background: var(--steel); }
+  .section-navy  { background: var(--navy); }
+  .section-blue  { background: var(--blue); }
+
+  /* Section headings */
+  .sec-head { text-align: center; margin-bottom: 56px; }
+  .sec-eye {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--fs); font-size: .65rem; font-weight: 700;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: var(--blue); margin-bottom: 14px;
+  }
+  .sec-eye::before { content: ''; width: 20px; height: 2px; background: var(--blue); display: block; }
+  .sec-eye.inv { color: var(--accent); }
+  .sec-eye.inv::before { background: var(--accent); }
+  .sec-title {
+    font-family: var(--fs); font-size: clamp(2rem, 3.5vw, 2.8rem);
+    font-weight: 800; line-height: 1.1; color: var(--navy); margin-bottom: 14px;
+  }
+  .sec-title span { color: var(--blue); }
+  .sec-title.inv { color: #fff; }
+  .sec-title.inv span { color: var(--accent); }
+  .sec-sub {
+    font-size: .92rem; color: var(--gray); font-weight: 300;
+    line-height: 1.8; max-width: 480px; margin: 0 auto;
+  }
+  .sec-sub.inv { color: rgba(255,255,255,.45); }
+
+  /* Buttons */
+  .btn-primary-lg {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--blue); color: #fff; border: 2px solid var(--blue);
+    padding: 13px 32px; font-family: var(--fs); font-size: .72rem;
+    font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; transition: all .25s; cursor: pointer;
+  }
+  .btn-primary-lg:hover { background: var(--blue-lt); border-color: var(--blue-lt); color: #fff; }
+
+  .btn-accent-lg {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent); color: #fff; border: 2px solid var(--accent);
+    padding: 13px 32px; font-family: var(--fs); font-size: .72rem;
+    font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; transition: all .25s; cursor: pointer;
+  }
+  .btn-accent-lg:hover { background: #e06210; border-color: #e06210; color: #fff; }
+
+  .btn-outline-lg {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: transparent; color: var(--navy); border: 2px solid var(--border);
+    padding: 13px 32px; font-family: var(--fs); font-size: .72rem;
+    font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; transition: all .25s; cursor: pointer;
+  }
+  .btn-outline-lg:hover { border-color: var(--blue); color: var(--blue); }
+
+  .btn-ghost-inv {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,.08); color: rgba(255,255,255,.75);
+    border: 1px solid rgba(255,255,255,.18);
+    padding: 13px 32px; font-family: var(--fs); font-size: .72rem;
+    font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; transition: all .25s;
+  }
+  .btn-ghost-inv:hover { background: rgba(255,255,255,.14); color: #fff; }
+
+  /* Status badges (used on tracking/shipment pages) */
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--fs); font-size: .62rem; font-weight: 700;
+    letter-spacing: .12em; text-transform: uppercase; padding: 5px 12px;
+    border: 1px solid;
+  }
+  .status-badge.delivered  { background: #F0FDF4; border-color: #22C55E; color: #166534; }
+  .status-badge.transit    { background: #EFF6FF; border-color: var(--blue); color: var(--blue); }
+  .status-badge.pending    { background: #FFFBEB; border-color: var(--accent); color: #92400E; }
+  .status-badge.cancelled  { background: #FFF1F0; border-color: #EF4444; color: #991B1B; }
+
+  /* Timeline (used on tracking page) */
+  .sc-timeline { position: relative; padding-left: 32px; }
+  .sc-timeline::before {
+    content: ''; position: absolute; left: 9px; top: 6px; bottom: 6px;
+    width: 2px; background: var(--border);
+  }
+  .sc-timeline-item { position: relative; margin-bottom: 28px; }
+  .sc-timeline-item:last-child { margin-bottom: 0; }
+  .sc-timeline-dot {
+    position: absolute; left: -27px; top: 4px;
+    width: 14px; height: 14px; background: var(--blue);
+    border: 2px solid #fff; box-shadow: 0 0 0 2px var(--blue);
+  }
+  .sc-timeline-dot.done { background: #22C55E; box-shadow: 0 0 0 2px #22C55E; }
+  .sc-timeline-dot.pending { background: var(--border); box-shadow: 0 0 0 2px var(--border); }
+  .sc-timeline-label {
+    font-family: var(--fs); font-size: .8rem; font-weight: 700;
+    color: var(--navy); margin-bottom: 3px;
+  }
+  .sc-timeline-time { font-size: .72rem; color: var(--gray); margin-bottom: 4px; }
+  .sc-timeline-desc { font-size: .82rem; color: var(--gray); line-height: 1.6; }
+
+  /* Executive / person cards */
+  .exec-card {
+    background: #fff; border: 1px solid var(--border);
+    padding: 0; overflow: hidden;
+    transition: box-shadow .3s, transform .3s;
+  }
+  .exec-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(10,22,40,.1); }
+  .exec-card-img { height: 260px; background: var(--steel); overflow: hidden; }
+  .exec-card-img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s; }
+  .exec-card:hover .exec-card-img img { transform: scale(1.04); }
+  .exec-card-body { padding: 22px 24px; border-top: 3px solid var(--blue); }
+  .exec-card-name { font-family: var(--fs); font-size: 1rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+  .exec-card-role { font-size: .72rem; letter-spacing: .1em; text-transform: uppercase; color: var(--accent); font-weight: 500; }
+
+  /* Generic bordered card (used across pages) */
+  .sc-card {
+    background: #fff; border: 1px solid var(--border);
+    transition: box-shadow .25s, transform .25s;
+  }
+  .sc-card:hover { box-shadow: 0 10px 32px rgba(10,22,40,.09); transform: translateY(-3px); }
+  .sc-card-header {
+    background: var(--navy); padding: 18px 24px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .sc-card-header i { color: var(--accent); }
+  .sc-card-header h5 {
+    font-family: var(--fs); font-size: .82rem; font-weight: 700;
+    color: #fff; margin: 0; letter-spacing: .06em; text-transform: uppercase;
+  }
+  .sc-card-body { padding: 24px; }
+
+  /* CTA bar (used on multiple pages) */
+  .cta-bar { background: var(--blue); padding: 60px 0; }
+  .cta-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 24px; flex-wrap: wrap;
+  }
+  .cta-text h3 {
+    font-family: var(--fs); font-size: 1.9rem; font-weight: 800;
+    color: #fff; margin-bottom: 6px; line-height: 1.15;
+  }
+  .cta-text p { font-size: .9rem; color: rgba(255,255,255,.6); font-weight: 300; }
+  .btn-cta-white {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: #fff; color: var(--blue); border: 2px solid #fff;
+    padding: 14px 32px; font-family: var(--fs); font-size: .75rem;
+    font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; transition: all .25s; white-space: nowrap;
+  }
+  .btn-cta-white:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ════════════════════════════════════════════════════
+     FOOTER
+  ════════════════════════════════════════════════════ */
+  .sc-footer {
+    background: var(--navy); border-top: 1px solid rgba(255,255,255,.06);
+    margin-top: auto;
+  }
+
+  /* Top footer */
+  .footer-top { padding: 72px 0 56px; }
+  .footer-brand { margin-bottom: 20px; }
+  .footer-brand-name {
+    font-family: var(--fs); font-size: 1.1rem; font-weight: 800;
+    color: #fff; display: block; margin-bottom: 4px;
+  }
+  .footer-tagline {
+    font-size: .68rem; letter-spacing: .16em; text-transform: uppercase;
+    color: rgba(255,255,255,.25);
+  }
+  .footer-about {
+    font-size: .84rem; color: rgba(255,255,255,.38);
+    line-height: 1.8; margin: 20px 0 24px; max-width: 300px;
+  }
+  .footer-socials { display: flex; gap: 8px; }
+  .footer-social {
+    width: 36px; height: 36px; background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.09);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .85rem; color: rgba(255,255,255,.4);
+    text-decoration: none; transition: all .25s;
+  }
+  .footer-social:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Footer column headings */
+  .footer-col-title {
+    font-family: var(--fs); font-size: .68rem; font-weight: 700;
+    letter-spacing: .2em; text-transform: uppercase;
+    color: rgba(255,255,255,.9); margin-bottom: 20px;
+    padding-bottom: 10px; border-bottom: 2px solid var(--blue);
+    display: inline-block;
+  }
+
+  /* Footer nav links */
+  .footer-nav { list-style: none; }
+  .footer-nav li { margin-bottom: 8px; }
+  .footer-nav a {
+    font-size: .84rem; color: rgba(255,255,255,.38);
+    text-decoration: none; transition: color .2s;
+    display: inline-flex; align-items: center; gap: 7px;
+  }
+  .footer-nav a::before {
+    content: ''; width: 6px; height: 1px; background: var(--blue);
+    transition: width .2s;
+  }
+  .footer-nav a:hover { color: rgba(255,255,255,.75); }
+  .footer-nav a:hover::before { width: 12px; background: var(--accent); }
+
+  /* Footer contact rows */
+  .footer-contact-item {
+    display: flex; gap: 12px; align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .footer-contact-item:last-child { margin-bottom: 0; }
+  .footer-contact-icon {
+    width: 32px; height: 32px; background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; color: var(--accent); flex-shrink: 0;
+  }
+  .footer-contact-text { font-size: .82rem; color: rgba(255,255,255,.38); line-height: 1.6; }
+  .footer-contact-text strong {
+    display: block; color: rgba(255,255,255,.6);
+    font-size: .72rem; letter-spacing: .06em; font-weight: 500; margin-bottom: 2px;
+  }
+
+  /* Newsletter mini-form in footer */
+  .footer-nl-form { display: flex; border: 1px solid rgba(255,255,255,.1); margin-top: 14px; }
+  .footer-nl-input {
+    flex: 1; background: rgba(255,255,255,.04); border: none; outline: none;
+    padding: 10px 14px; font-size: .82rem; color: #fff;
+    font-family: var(--fb); min-width: 0;
+  }
+  .footer-nl-input::placeholder { color: rgba(255,255,255,.22); }
+  .footer-nl-btn {
+    background: var(--blue); color: #fff; border: none;
+    padding: 0 18px; font-family: var(--fs); font-size: .62rem;
+    font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+    cursor: pointer; white-space: nowrap; transition: background .25s;
+  }
+  .footer-nl-btn:hover { background: var(--accent); }
+
+  /* Bottom bar */
+  .footer-bottom {
+    border-top: 1px solid rgba(255,255,255,.06);
+    padding: 18px 0;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .footer-bottom-copy {
+    font-size: .72rem; color: rgba(255,255,255,.22); font-family: var(--fb);
+  }
+  .footer-bottom-links { display: flex; gap: 20px; }
+  .footer-bottom-links a {
+    font-size: .72rem; color: rgba(255,255,255,.22);
+    text-decoration: none; transition: color .2s; font-family: var(--fb);
+  }
+  .footer-bottom-links a:hover { color: rgba(255,255,255,.55); }
+  .footer-accent-bar {
+    height: 3px;
+    background: linear-gradient(to right, var(--blue) 0%, var(--accent) 100%);
+  }
+
+  /* ════════════════════════════════════════════════════
+     RESPONSIVE
+  ════════════════════════════════════════════════════ */
+  @media (max-width: 1023px) {
+    .nav-links, .nav-actions .nav-track-btn, .nav-actions .nav-cta-btn { display: none; }
+    .nav-toggle { display: flex; }
+    .nav-topbar { display: none; }
+  }
+  @media (max-width: 767px) {
+    .section { padding: 60px 0; }
+    .footer-bottom { flex-direction: column; align-items: flex-start; }
+    .messages-wrap { width: calc(100vw - 32px); right: 16px; }
+    .cta-inner { flex-direction: column; align-items: flex-start; }
+  }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════════ -->
+<nav class="sc-navbar" id="sc-navbar">
+
+  <!-- Top utility bar -->
+  <div class="nav-topbar">
+    <div class="container">
+      <div class="nav-topbar-inner">
+        <div class="nav-topbar-left">
+          <span class="nav-topbar-item">
+            <i class="fas fa-map-marker-alt"></i>
+            {% if site_settings %}{{ site_settings.address }}{% else %}123 Logistics Street, Business District{% endif %}
+          </span>
+        </div>
+        <div class="nav-topbar-right">
+          <a href="tel:{% if site_settings %}{{ site_settings.phone_number }}{% else %}+15551234567{% endif %}" class="nav-topbar-item">
+            <i class="fas fa-phone"></i>
+            {% if site_settings %}{{ site_settings.phone_number }}{% else %}+1 (555) 123-4567{% endif %}
+          </a>
+          <div class="nav-topbar-divider"></div>
+          <a href="mailto:{% if site_settings %}{{ site_settings.email }}{% else %}info@logistics.com{% endif %}" class="nav-topbar-item">
+            <i class="fas fa-envelope"></i>
+            {% if site_settings %}{{ site_settings.email }}{% else %}info@logistics.com{% endif %}
+          </a>
+          <div class="nav-topbar-divider"></div>
+          <span class="nav-topbar-item">
+            <i class="fas fa-clock"></i>
+            Mon–Fri 8am–8pm
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main nav row -->
+  <div class="container">
+    <div class="nav-main-row">
+
+      <!-- Brand -->
+      <a href="{% url 'home' %}" class="nav-brand">
+        {% if site_settings and site_settings.logo %}
+          <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.company_name }}">
+        {% else %}
+          <div class="nav-brand-logo"><i class="fas fa-shipping-fast"></i></div>
+          <div class="nav-brand-text">
+            <span class="nav-brand-name">{% if site_settings %}{{ site_settings.company_name }}{% else %}GlobalLogistics{% endif %}</span>
+            <span class="nav-brand-tagline">Supply Chain Solutions</span>
+          </div>
+        {% endif %}
+      </a>
+
+      <!-- Desktop links (UPDATED PATHS) -->
+      <ul class="nav-links">
+        <li>
+          <a href="{% url 'home' %}" class="nav-link-item {% block nav_home %}{% endblock %}">Home</a>
+        </li>
+        <li>
+          <a href="/pages/services" class="nav-link-item {% block nav_services %}{% endblock %}">
+            Services <i class="fas fa-chevron-down"></i>
+          </a>
+          <ul class="nav-dropdown">
+            <li><a href="/pages/services#air-freight"><i class="fas fa-plane-departure"></i> Air Freight</a></li>
+            <li><a href="/pages/services#ocean-freight"><i class="fas fa-ship"></i> Ocean Freight</a></li>
+            <li><a href="/pages/services#road-transport"><i class="fas fa-truck"></i> Road Transport</a></li>
+            <li><a href="/pages/services#warehousing"><i class="fas fa-warehouse"></i> Warehousing</a></li>
+            <li><a href="/pages/services#customs"><i class="fas fa-file-alt"></i> Customs Clearance</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="/shipments/track" class="nav-link-item {% block nav_tracking %}{% endblock %}">
+            Track Shipment
+          </a>
+        </li>
+        <li>
+          <a href="/pages/about" class="nav-link-item {% block nav_about %}{% endblock %}">About</a>
+        </li>
+        <li>
+          <a href="/pages/contact" class="nav-link-item {% block nav_contact %}{% endblock %}">Contact</a>
+        </li>
+      </ul>
+
+      <!-- Right actions (Get Quote uses contact page) -->
+      <div class="nav-actions">
+        <a href="/shipments/track" class="nav-track-btn">
+          <i class="fas fa-search-location"></i> Track
+        </a>
+        <a href="/pages/contact" class="nav-cta-btn">
+          <i class="fas fa-calendar-check"></i> Get Quote
+        </a>
+        <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+          <i class="fas fa-bars" id="nav-toggle-icon"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Mobile drawer (UPDATED PATHS) -->
+  <div class="nav-mobile" id="nav-mobile">
+    <div class="container">
+      <a href="{% url 'home' %}" class="nav-mobile-link {% block nav_home_m %}{% endblock %}">
+        Home <i class="fas fa-arrow-right"></i>
+      </a>
+      <div>
+        <a href="/pages/services" class="nav-mobile-link" id="mob-services-toggle">
+          Services <i class="fas fa-chevron-down" id="mob-services-icon"></i>
+        </a>
+        <div class="nav-mobile-sub" id="mob-services-sub">
+          <a href="/pages/services#air-freight"><i class="fas fa-plane-departure"></i> Air Freight</a>
+          <a href="/pages/services#ocean-freight"><i class="fas fa-ship"></i> Ocean Freight</a>
+          <a href="/pages/services#road-transport"><i class="fas fa-truck"></i> Road Transport</a>
+          <a href="/pages/services#warehousing"><i class="fas fa-warehouse"></i> Warehousing</a>
+          <a href="/pages/services#customs"><i class="fas fa-file-alt"></i> Customs Clearance</a>
+        </div>
+      </div>
+      <a href="/shipments/track" class="nav-mobile-link {% block nav_tracking_m %}{% endblock %}">
+        Track Shipment <i class="fas fa-arrow-right"></i>
+      </a>
+      <a href="/pages/about" class="nav-mobile-link {% block nav_about_m %}{% endblock %}">
+        About <i class="fas fa-arrow-right"></i>
+      </a>
+      <a href="/pages/contact" class="nav-mobile-link {% block nav_contact_m %}{% endblock %}">
+        Contact <i class="fas fa-arrow-right"></i>
+      </a>
+      <div class="nav-mobile-actions">
+        <a href="/shipments/track" class="nav-track-btn">
+          <i class="fas fa-search-location"></i> Track Shipment
+        </a>
+        <a href="/pages/contact" class="nav-cta-btn">
+          <i class="fas fa-calendar-check"></i> Get Quote
+        </a>
+      </div>
+    </div>
+  </div>
+
+</nav>
+
+
+<!-- ════════════════════════════════════════════════════
+     FLASH MESSAGES
+════════════════════════════════════════════════════ -->
+{% if messages %}
+<div class="messages-wrap" id="messages-wrap">
+  {% for message in messages %}
+  <div class="sc-alert sc-alert-{% if message.tags == 'error' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %}">
+    <i class="fas {% if message.tags == 'error' %}fa-circle-xmark{% elif message.tags == 'success' %}fa-circle-check{% elif message.tags == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+    <span>{{ message }}</span>
+    <button class="sc-alert-close" onclick="this.closest('.sc-alert').remove()">
+      <i class="fas fa-xmark"></i>
+    </button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+
+<!-- ════════════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════════ -->
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+
+<!-- ════════════════════════════════════════════════════
+     FOOTER (UPDATED NAVIGATION PATHS)
+════════════════════════════════════════════════════ -->
+<footer class="sc-footer">
+  <div class="footer-accent-bar"></div>
+  <div class="container">
+    <div class="footer-top">
+      <div class="row g-5">
+
+        <!-- Col 1: Brand -->
+        <div class="col-lg-3 col-md-6">
+          <div class="footer-brand">
+            {% if site_settings and site_settings.logo %}
+              <img src="{{ site_settings.logo.url }}" alt="{{ site_settings.company_name }}" style="max-height:36px; margin-bottom:10px; display:block;">
+            {% else %}
+              <span class="footer-brand-name">{% if site_settings %}{{ site_settings.company_name }}{% else %}GlobalLogistics{% endif %}</span>
+              <span class="footer-tagline">Supply Chain Solutions</span>
+            {% endif %}
+          </div>
+          <p class="footer-about">
+            Connecting businesses worldwide with reliable, efficient supply chain management. Air, ocean, and road freight — all in one platform.
+          </p>
+          <div class="footer-socials">
+            <a href="#" class="footer-social" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" class="footer-social" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="footer-social" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" class="footer-social" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <!-- Col 2: Services (UPDATED) -->
+        <div class="col-lg-2 col-md-6">
+          <span class="footer-col-title">Services</span>
+          <ul class="footer-nav">
+            <li><a href="/pages/services#air-freight">Air Freight</a></li>
+            <li><a href="/pages/services#ocean-freight">Ocean Freight</a></li>
+            <li><a href="/pages/services#road-transport">Road Transport</a></li>
+            <li><a href="/pages/services#warehousing">Warehousing</a></li>
+            <li><a href="/pages/services#customs">Customs Clearance</a></li>
+            <li><a href="/pages/services">Supply Chain</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 3: Company (UPDATED) -->
+        <div class="col-lg-2 col-md-6">
+          <span class="footer-col-title">Company</span>
+          <ul class="footer-nav">
+            <li><a href="/pages/about">About Us</a></li>
+            <li><a href="/pages/about#team">Our Team</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">News &amp; Blog</a></li>
+            <li><a href="/pages/contact">Contact Us</a></li>
+            <li><a href="#">Partners</a></li>
+          </ul>
+        </div>
+
+        <!-- Col 4: Contact -->
+        <div class="col-lg-2 col-md-6">
+          <span class="footer-col-title">Contact</span>
+          <div class="footer-contact-item">
+            <div class="footer-contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+            <div class="footer-contact-text">
+              <strong>Headquarters</strong>
+              {% if site_settings %}{{ site_settings.address }}{% else %}123 Logistics Street, Business District{% endif %}
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <div class="footer-contact-icon"><i class="fas fa-phone"></i></div>
+            <div class="footer-contact-text">
+              <strong>Phone</strong>
+              {% if site_settings %}{{ site_settings.phone_number }}{% else %}+1 (555) 123-4567{% endif %}
+            </div>
+          </div>
+          <div class="footer-contact-item">
+            <div class="footer-contact-icon"><i class="fas fa-envelope"></i></div>
+            <div class="footer-contact-text">
+              <strong>Email</strong>
+              {% if site_settings %}{{ site_settings.email }}{% else %}info@logistics.com{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Col 5: Newsletter (unchanged) -->
+        <div class="col-lg-3 col-md-6">
+          <span class="footer-col-title">Newsletter</span>
+          <p style="font-size:.84rem; color:rgba(255,255,255,.35); line-height:1.7; margin-bottom:4px;">
+            Get logistics insights, industry news, and company updates delivered to your inbox.
+          </p>
+          <form class="footer-nl-form" method="post" action="#">
+            {% csrf_token %}
+            <input type="email" name="email" class="footer-nl-input" placeholder="Your email" required>
+            <button type="submit" class="footer-nl-btn">Subscribe</button>
+          </form>
+          <p style="font-size:.66rem; color:rgba(255,255,255,.18); margin-top:10px;">
+            No spam. Unsubscribe at any time.
+          </p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div class="footer-bottom">
+      <span class="footer-bottom-copy">
+        &copy; {% now "Y" %} {% if site_settings %}{{ site_settings.company_name }}{% else %}GlobalLogistics{% endif %}. All rights reserved.
+      </span>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Cookie Policy</a>
+        <a href="#">Sitemap</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+// ── Navbar scroll shadow ──
+const navbar = document.getElementById('sc-navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// ── Mobile toggle ──
+const toggle     = document.getElementById('nav-toggle');
+const mobileNav  = document.getElementById('nav-mobile');
+const toggleIcon = document.getElementById('nav-toggle-icon');
+toggle.addEventListener('click', () => {
+  const open = mobileNav.classList.toggle('open');
+  toggleIcon.className = open ? 'fas fa-xmark' : 'fas fa-bars';
+});
+
+// ── Mobile services accordion (now points to /pages/services) ──
+const mobSvcToggle = document.getElementById('mob-services-toggle');
+const mobSvcSub    = document.getElementById('mob-services-sub');
+const mobSvcIcon   = document.getElementById('mob-services-icon');
+if (mobSvcToggle) {
+  mobSvcToggle.addEventListener('click', (e) => {
+    e.preventDefault();
+    const open = mobSvcSub.classList.toggle('open');
+    mobSvcIcon.style.transform = open ? 'rotate(180deg)' : '';
+  });
+}
+
+// ── Auto-dismiss flash messages after 5s ──
+setTimeout(() => {
+  document.querySelectorAll('.sc-alert').forEach(el => {
+    el.style.transition = 'opacity .4s ease, transform .4s ease';
+    el.style.opacity = '0';
+    el.style.transform = 'translateX(20px)';
+    setTimeout(() => el.remove(), 400);
+  });
+}, 5000);
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

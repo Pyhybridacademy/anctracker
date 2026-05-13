@@ -1,0 +1,1102 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tracking - {{ shipment.tracking_code }} - {% if site_settings %}{{ site_settings.company_name }}{% else %}Logistics Company{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0A1628;
+  --blue:    #1346A0;
+  --blue-lt: #1E5FBF;
+  --accent:  #F97316;
+  --green:   #16A34A;
+  --red:     #DC2626;
+  --amber:   #D97706;
+  --steel:   #E8EDF5;
+  --gray:    #64748B;
+  --border:  #D1D9E8;
+  --warm:    #F8FAFC;
+  --fs: 'Syne', sans-serif;
+  --fb: 'Inter', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--fb); background: var(--warm); color: var(--navy); font-weight: 300; -webkit-font-smoothing: antialiased; }
+
+/* ── TRACKING HEADER (dark panel) ── */
+.track-header {
+  background: var(--navy); position: relative; overflow: hidden;
+  padding: 52px 0 0;
+}
+.track-header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 60px 60px; pointer-events: none;
+}
+.track-header::after {
+  content: '';
+  position: absolute; top: -150px; right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(19,70,160,.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+.th-inner { position: relative; z-index: 2; padding-bottom: 40px; }
+.th-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; margin-bottom: 32px; }
+.th-label {
+  font-family: var(--fs); font-size: .6rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase; color: rgba(255,255,255,.4);
+  display: block; margin-bottom: 8px;
+}
+.th-code {
+  font-family: 'Courier New', monospace; font-size: clamp(1.4rem, 3vw, 2rem);
+  font-weight: 700; color: #fff; letter-spacing: 3px;
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+  padding: 10px 20px; display: inline-block;
+}
+.th-ref {
+  font-size: .72rem; color: rgba(255,255,255,.4); margin-top: 8px; display: block;
+}
+.th-status { text-align: right; }
+.status-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 18px; font-family: var(--fs); font-size: .68rem;
+  font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  border: 1px solid; margin-bottom: 8px;
+}
+.status-pill.delivered  { color: var(--green); border-color: rgba(22,163,74,.35); background: rgba(22,163,74,.1); }
+.status-pill.in_transit { color: #38BDF8; border-color: rgba(56,189,248,.35); background: rgba(56,189,248,.1); }
+.status-pill.registered { color: var(--blue-lt); border-color: rgba(30,95,191,.35); background: rgba(30,95,191,.1); }
+.status-pill.out_for_delivery { color: var(--accent); border-color: rgba(249,115,22,.35); background: rgba(249,115,22,.1); }
+.status-pill.on_hold    { color: var(--red); border-color: rgba(220,38,38,.35); background: rgba(220,38,38,.1); }
+.status-pill.customs_clearance { color: #A78BFA; border-color: rgba(167,139,250,.35); background: rgba(167,139,250,.1); }
+.status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.overdue-badge {
+  display: inline-block; background: var(--red); color: #fff;
+  padding: 4px 12px; font-family: var(--fs); font-size: .6rem;
+  font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+}
+
+/* ── PROGRESS STEPS ── */
+.progress-strip {
+  background: rgba(255,255,255,.04); border-top: 1px solid rgba(255,255,255,.08);
+  padding: 28px 0;
+}
+.prog-steps { display: flex; align-items: flex-start; gap: 0; }
+.prog-step { flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; }
+.prog-step::before {
+  content: ''; position: absolute; top: 19px; left: calc(-50%);
+  right: calc(50%); height: 2px; background: rgba(255,255,255,.1);
+}
+.prog-step:first-child::before { display: none; }
+.prog-step.completed::before { background: var(--green); }
+.prog-step.active::before { background: var(--blue); }
+
+.prog-icon {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .85rem; position: relative; z-index: 2;
+  border: 2px solid rgba(255,255,255,.1);
+  background: rgba(255,255,255,.06); color: rgba(255,255,255,.3);
+  transition: all .3s;
+}
+.prog-step.completed .prog-icon { background: var(--green); border-color: var(--green); color: #fff; }
+.prog-step.active .prog-icon {
+  background: var(--blue); border-color: var(--blue); color: #fff;
+  box-shadow: 0 0 0 4px rgba(19,70,160,.3);
+  animation: activePulse 2s infinite;
+}
+@keyframes activePulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(19,70,160,.3); }
+  50%       { box-shadow: 0 0 0 8px rgba(19,70,160,.1); }
+}
+
+.prog-label { font-family: var(--fs); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.35); text-align: center; margin-top: 10px; }
+.prog-step.completed .prog-label { color: rgba(255,255,255,.65); }
+.prog-step.active .prog-label { color: #fff; }
+.prog-sub { font-size: .65rem; color: rgba(255,255,255,.25); text-align: center; margin-top: 3px; }
+.prog-step.active .prog-sub { color: rgba(255,255,255,.5); }
+
+/* breadcrumb */
+.bc { background: rgba(255,255,255,.03); border-top: 1px solid rgba(255,255,255,.06); padding: 10px 0; }
+.bc ol { list-style: none; display: flex; gap: 8px; flex-wrap: wrap; }
+.bc li { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); display: flex; align-items: center; gap: 8px; }
+.bc li::before { content: '/'; color: rgba(255,255,255,.15); }
+.bc li:first-child::before { display: none; }
+.bc a { color: rgba(255,255,255,.5); text-decoration: none; transition: color .2s; }
+.bc a:hover { color: var(--accent); }
+.bc li.cur { color: var(--accent); }
+
+/* ── INFO PANELS ── */
+.section { padding: 60px 0; }
+.section-light { background: var(--warm); }
+.section-steel { background: var(--steel); }
+.section-white { background: #fff; }
+
+.panel { border: 1px solid var(--border); background: #fff; }
+.panel-header {
+  padding: 16px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--fs); font-size: .7rem; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--navy);
+}
+.panel-header i { color: var(--blue); }
+.panel-body { padding: 24px; }
+
+.info-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.info-row:last-child { border-bottom: none; }
+.ir-label { font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--gray); min-width: 120px; padding-top: 2px; flex-shrink: 0; }
+.ir-value { font-size: .86rem; color: var(--navy); line-height: 1.6; }
+
+/* ── TIMELINE ── */
+.timeline { position: relative; padding-left: 28px; }
+.timeline::before {
+  content: ''; position: absolute; left: 9px; top: 0; bottom: 0;
+  width: 2px; background: var(--border);
+}
+.tl-item {
+  position: relative; padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+.tl-item:last-child { border-bottom: none; }
+.tl-dot {
+  position: absolute; left: -33px; top: 24px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--blue); border: 3px solid #fff;
+  box-shadow: 0 0 0 2px var(--blue);
+}
+.tl-item.tl-current .tl-dot {
+  background: var(--green); box-shadow: 0 0 0 2px var(--green);
+  animation: tlPulse 2s infinite;
+}
+@keyframes tlPulse {
+  0%, 100% { box-shadow: 0 0 0 2px var(--green); }
+  50%       { box-shadow: 0 0 0 5px rgba(22,163,74,.2); }
+}
+.tl-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.tl-tag {
+  display: inline-block; padding: 3px 10px;
+  font-family: var(--fs); font-size: .6rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  background: var(--steel); color: var(--blue); margin-bottom: 6px;
+}
+.tl-tag.status-delivered        { background: rgba(22,163,74,.1); color: var(--green); }
+.tl-tag.status-in_transit       { background: rgba(56,189,248,.1); color: #0284C7; }
+.tl-tag.status-out_for_delivery { background: rgba(249,115,22,.1); color: var(--accent); }
+.tl-tag.status-on_hold          { background: rgba(220,38,38,.1); color: var(--red); }
+.tl-tag.status-registered       { background: rgba(19,70,160,.1); color: var(--blue); }
+.tl-tag.status-customs_clearance{ background: rgba(167,139,250,.1); color: #7C3AED; }
+.tl-note { font-size: .83rem; color: var(--gray); line-height: 1.65; margin-bottom: 6px; }
+.tl-loc { font-size: .75rem; color: var(--gray); display: flex; align-items: center; gap: 6px; }
+.tl-loc i { color: var(--blue); }
+.tl-loc a { color: var(--blue); text-decoration: none; font-size: .72rem; }
+.tl-date { text-align: right; flex-shrink: 0; }
+.tl-date-main { font-family: var(--fs); font-size: .85rem; font-weight: 700; color: var(--navy); }
+.tl-date-time { font-size: .72rem; color: var(--gray); }
+.tl-by { font-size: .68rem; color: var(--gray); margin-top: 4px; }
+
+/* ── DOCS ── */
+.doc-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.doc-item:last-child { border-bottom: none; }
+.doc-icon { width: 36px; height: 36px; background: var(--steel); display: flex; align-items: center; justify-content: center; font-size: .9rem; color: var(--blue); flex-shrink: 0; }
+.doc-info { flex: 1; }
+.doc-name { font-size: .84rem; font-weight: 500; color: var(--navy); }
+.doc-date { font-size: .72rem; color: var(--gray); }
+.doc-dl { color: var(--blue); text-decoration: none; font-size: .8rem; transition: color .2s; }
+.doc-dl:hover { color: var(--accent); }
+.doc-empty { text-align: center; padding: 32px 0; }
+.doc-empty i { font-size: 2rem; color: var(--border); display: block; margin-bottom: 10px; }
+.doc-empty p { font-size: .82rem; color: var(--gray); }
+
+/* ── ACTIONS PANEL ── */
+.action-grid { display: grid; gap: 8px; }
+.btn-action {
+  display: flex; align-items: center; gap: 10px;
+  background: transparent; border: 1px solid var(--border); color: var(--navy);
+  padding: 12px 16px; font-family: var(--fs); font-size: .65rem;
+  font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  text-decoration: none; cursor: pointer; transition: all .22s; width: 100%;
+}
+.btn-action:hover { border-color: var(--blue); color: var(--blue); background: var(--steel); }
+.btn-action.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn-action.primary:hover { background: var(--blue-lt); }
+.btn-action.success { background: var(--green); border-color: var(--green); color: #fff; }
+.btn-action.success:hover { background: #15803D; }
+.btn-action i { width: 16px; text-align: center; }
+
+.update-note {
+  text-align: center; margin-top: 20px; padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: .72rem; color: var(--gray);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.update-note i { color: var(--blue); }
+
+/* ── BADGES ── */
+.badge-sc {
+  display: inline-block; padding: 3px 10px;
+  font-family: var(--fs); font-size: .6rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+}
+.badge-warning  { background: rgba(217,119,6,.12); color: var(--amber); }
+.badge-danger   { background: rgba(220,38,38,.12); color: var(--red); }
+.badge-dark     { background: rgba(10,22,40,.1); color: var(--navy); }
+.badge-success  { background: rgba(22,163,74,.12); color: var(--green); }
+.badge-priority { background: rgba(19,70,160,.1); color: var(--blue); }
+
+/* notes alert */
+.note-alert {
+  border: 1px solid var(--border); border-left: 4px solid var(--blue);
+  background: var(--steel); padding: 14px 18px; margin-bottom: 12px;
+  font-size: .84rem; color: var(--gray); line-height: 1.65;
+}
+.note-alert strong { color: var(--navy); font-weight: 600; font-size: .75rem; letter-spacing: .06em; text-transform: uppercase; display: block; margin-bottom: 5px; }
+.note-alert.internal { border-left-color: var(--gray); }
+
+/* ── PAYMENT STYLES ── */
+.payment-progress {
+  background: var(--steel);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.progress {
+  height: 10px;
+  background: var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), var(--blue));
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+.payment-method-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+.payment-method-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  transition: all 0.3s;
+  background: #fff;
+}
+.payment-method-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  border-color: var(--blue);
+}
+.payment-method-icon {
+  font-size: 24px;
+  color: var(--blue);
+  margin-bottom: 10px;
+}
+.payment-method-name {
+  font-family: var(--fs);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 5px;
+}
+.payment-method-desc {
+  font-size: 11px;
+  color: var(--gray);
+  margin-bottom: 15px;
+}
+.payment-status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.badge-paid { background: rgba(22,163,74,.1); color: var(--green); }
+.badge-pending { background: rgba(217,119,6,.1); color: var(--amber); }
+.badge-awaiting { background: rgba(19,70,160,.1); color: var(--blue); }
+.badge-verified { background: rgba(19,70,160,.1); color: var(--blue); }
+
+.payment-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.payment-table th {
+  font-family: var(--fs);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--gray);
+  padding: 10px 0;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.payment-table td {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.payment-table tr:last-child td {
+  border-bottom: none;
+}
+
+.floating-pay-btn {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  z-index: 1000;
+  background: var(--green);
+  color: white;
+  padding: 15px 30px;
+  border-radius: 50px;
+  box-shadow: 0 5px 20px rgba(22,163,74,0.3);
+  text-decoration: none;
+  font-family: var(--fs);
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all 0.3s;
+}
+.floating-pay-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(22,163,74,0.4);
+  color: white;
+}
+.floating-pay-btn i {
+  font-size: 16px;
+}
+
+.goods-image {
+  max-width: 100%;
+  max-height: 200px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.goods-image:hover {
+  opacity: 0.9;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 767px) {
+  .section { padding: 40px 0; }
+  .th-top { flex-direction: column; }
+  .th-status { text-align: left; }
+  .prog-label { font-size: .55rem; }
+  .panel-body { padding: 16px; }
+  .ir-label { min-width: 90px; }
+  .payment-method-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ━━━━━━━━━━ TRACKING HEADER ━━━━━━━━━━ -->
+<div class="track-header">
+  <div class="container th-inner">
+
+    <div class="th-top">
+      <div>
+        <span class="th-label">Tracking Number</span>
+        <div class="th-code">{{ shipment.tracking_code }}</div>
+        {% if shipment.reference_number %}
+        <span class="th-ref"><i class="fas fa-hashtag me-1"></i>Ref: {{ shipment.reference_number }}</span>
+        {% endif %}
+      </div>
+      <div class="th-status">
+        <div class="status-pill {{ shipment.current_status }}">
+          <div class="status-dot"></div>
+          {{ shipment.get_current_status_display }}
+        </div>
+        {% if shipment.is_overdue %}
+        <div><span class="overdue-badge"><i class="fas fa-exclamation-triangle me-1"></i>Overdue</span></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="progress-strip">
+      <div class="prog-steps">
+
+        <div class="prog-step {% if shipment.current_status in 'registered,at_sorting,customs_clearance,in_transit,at_distribution,out_for_delivery,delivered' %}completed{% endif %}">
+          <div class="prog-icon"><i class="fas fa-edit"></i></div>
+          <span class="prog-label">Registered</span>
+          <span class="prog-sub">{{ shipment.created_at|date:"M d" }}</span>
+        </div>
+
+        <div class="prog-step {% if shipment.current_status in 'at_sorting,customs_clearance,in_transit,at_distribution,out_for_delivery,delivered' %}completed{% elif shipment.current_status == 'at_sorting' %}active{% endif %}">
+          <div class="prog-icon"><i class="fas fa-sort-amount-down"></i></div>
+          <span class="prog-label">Sorting</span>
+          <span class="prog-sub">Processing</span>
+        </div>
+
+        <div class="prog-step {% if shipment.current_status in 'in_transit,at_distribution,out_for_delivery,delivered' %}completed{% elif shipment.current_status == 'in_transit' %}active{% endif %}">
+          <div class="prog-icon"><i class="fas fa-truck"></i></div>
+          <span class="prog-label">In Transit</span>
+          <span class="prog-sub">ETA {{ shipment.expected_delivery_date|date:"M d" }}</span>
+        </div>
+
+        <div class="prog-step {% if shipment.current_status in 'out_for_delivery,delivered' %}completed{% elif shipment.current_status == 'out_for_delivery' %}active{% endif %}">
+          <div class="prog-icon"><i class="fas fa-shipping-fast"></i></div>
+          <span class="prog-label">Out for Delivery</span>
+          <span class="prog-sub">Today before 6PM</span>
+        </div>
+
+        <div class="prog-step {% if shipment.current_status == 'delivered' %}completed{% endif %}">
+          <div class="prog-icon"><i class="fas fa-check"></i></div>
+          <span class="prog-label">Delivered</span>
+          <span class="prog-sub">
+            {% if shipment.actual_delivery_date %}{{ shipment.actual_delivery_date|date:"M d" }}{% else %}{{ shipment.expected_delivery_date|date:"M d" }}{% endif %}
+          </span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="bc">
+    <div class="container">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="{% url 'track_shipment' %}">Track Shipment</a></li>
+        <li class="cur">{{ shipment.tracking_code }}</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━━━━━━━━ PAYMENT SECTION ━━━━━━━━━━ -->
+<section class="section section-light">
+  <div class="container">
+    <div class="row">
+      <div class="col-12">
+        <div class="panel">
+          <div class="panel-header">
+            <i class="fas fa-credit-card"></i>
+            Payment Information
+          </div>
+          <div class="panel-body">
+            <!-- Payment Progress -->
+            <div class="payment-progress">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="fw-bold">Payment Progress</span>
+                <span class="fw-bold">${{ total_paid|floatformat:2 }} paid of ${{ shipment.total_amount|floatformat:2 }}</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: {{ payment_progress }}%"></div>
+              </div>
+              {% if outstanding > 0 %}
+              <div class="text-end mt-2">
+                <span class="text-danger fw-bold">Outstanding: ${{ outstanding|floatformat:2 }}</span>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Payment Status Summary -->
+            <div class="row mb-4">
+              <div class="col-md-4">
+                <div class="bg-light p-3 rounded">
+                  <small class="text-muted d-block">Payment Status</small>
+                  <span class="payment-status-badge 
+                    {% if shipment.payment_status == 'paid' %}badge-paid
+                    {% elif shipment.payment_status == 'partial' %}badge-awaiting
+                    {% else %}badge-pending{% endif %}">
+                    {{ shipment.get_payment_status_display }}
+                  </span>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="bg-light p-3 rounded">
+                  <small class="text-muted d-block">Total Amount</small>
+                  <h4 class="mb-0">${{ shipment.total_amount|floatformat:2 }}</h4>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="bg-light p-3 rounded">
+                  <small class="text-muted d-block">Paid Amount</small>
+                  <h4 class="mb-0 text-success">${{ total_paid|floatformat:2 }}</h4>
+                </div>
+              </div>
+            </div>
+
+            <!-- Payment Methods (if outstanding > 0) -->
+            {% if outstanding > 0 and payment_methods %}
+            <div class="mb-4">
+              <h5 class="mb-3">Make a Payment</h5>
+              <div class="payment-method-grid">
+                {% for method in payment_methods %}
+                <div class="payment-method-card">
+                  <div class="payment-method-icon">
+                    {% if method.method_type == 'crypto' %}
+                      <i class="fab fa-bitcoin"></i>
+                    {% elif method.method_type == 'bank' %}
+                      <i class="fas fa-university"></i>
+                    {% elif method.method_type == 'card' %}
+                      <i class="fas fa-credit-card"></i>
+                    {% elif method.method_type == 'mobile_money' %}
+                      <i class="fas fa-mobile-alt"></i>
+                    {% else %}
+                      <i class="fas fa-money-bill"></i>
+                    {% endif %}
+                  </div>
+                  <div class="payment-method-name">{{ method.name }}</div>
+                  <div class="payment-method-desc">{{ method.description|truncatechars:40 }}</div>
+                  <a href="{% url 'upload_payment_proof' shipment.tracking_code %}?method={{ method.id }}" 
+                     class="btn btn-sm btn-outline-primary w-100">
+                    Pay Now
+                  </a>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Payment History -->
+            {% if payments %}
+            <div>
+              <h5 class="mb-3">Payment History</h5>
+              <div class="table-responsive">
+                <table class="payment-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Transaction ID</th>
+                      <th>Method</th>
+                      <th>Amount</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for payment in payments %}
+                    <tr>
+                      <td>{{ payment.created_at|date:"M d, Y" }}</td>
+                      <td><small>{{ payment.transaction_id }}</small></td>
+                      <td>{{ payment.payment_method.name|default:"N/A" }}</td>
+                      <td>${{ payment.amount|floatformat:2 }} {{ payment.currency }}</td>
+                      <td>
+                        {% if payment.status == 'paid' %}
+                          <span class="payment-status-badge badge-paid">Paid</span>
+                        {% elif payment.status == 'verified' %}
+                          <span class="payment-status-badge badge-verified">Verified</span>
+                        {% elif payment.status == 'awaiting_proof' %}
+                          <span class="payment-status-badge badge-awaiting">Awaiting Verification</span>
+                        {% else %}
+                          <span class="payment-status-badge badge-pending">{{ payment.get_status_display }}</span>
+                        {% endif %}
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Goods Image -->
+            {% if shipment.goods_image %}
+            <div class="mt-4">
+              <h5 class="mb-3">Goods Image</h5>
+              <img src="{{ shipment.goods_image.url }}" alt="Goods" class="goods-image" 
+                   onclick="openModal('{{ shipment.goods_image.url }}')">
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━ SENDER + RECEIVER ━━━━━━━━━━ -->
+<section class="section section-light">
+  <div class="container">
+    <div class="row g-3">
+
+      <!-- Sender -->
+      <div class="col-md-6">
+        <div class="panel h-100">
+          <div class="panel-header"><i class="fas fa-user"></i>Sender Information</div>
+          <div class="panel-body">
+            <div class="info-row">
+              <span class="ir-label">Name</span>
+              <span class="ir-value">{{ shipment.sender_name }}</span>
+            </div>
+            {% if shipment.sender_company %}
+            <div class="info-row">
+              <span class="ir-label">Company</span>
+              <span class="ir-value">{{ shipment.sender_company }}</span>
+            </div>
+            {% endif %}
+            <div class="info-row">
+              <span class="ir-label">Address</span>
+              <span class="ir-value">
+                {{ shipment.sender_address }}<br>
+                {{ shipment.sender_city }}, {{ shipment.sender_state }} {{ shipment.sender_postal_code }}<br>
+                {{ shipment.sender_country }}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Phone</span>
+              <span class="ir-value"><i class="fas fa-phone me-1" style="color:var(--blue); font-size:.75rem;"></i>{{ shipment.sender_phone }}</span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Email</span>
+              <span class="ir-value"><i class="fas fa-envelope me-1" style="color:var(--blue); font-size:.75rem;"></i>{{ shipment.sender_email }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Receiver -->
+      <div class="col-md-6">
+        <div class="panel h-100">
+          <div class="panel-header"><i class="fas fa-user-check"></i>Receiver Information</div>
+          <div class="panel-body">
+            <div class="info-row">
+              <span class="ir-label">Name</span>
+              <span class="ir-value">{{ shipment.receiver_name }}</span>
+            </div>
+            {% if shipment.receiver_company %}
+            <div class="info-row">
+              <span class="ir-label">Company</span>
+              <span class="ir-value">{{ shipment.receiver_company }}</span>
+            </div>
+            {% endif %}
+            <div class="info-row">
+              <span class="ir-label">Address</span>
+              <span class="ir-value">
+                {{ shipment.receiver_address }}<br>
+                {{ shipment.receiver_city }}, {{ shipment.receiver_state }} {{ shipment.receiver_postal_code }}<br>
+                {{ shipment.receiver_country }}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Phone</span>
+              <span class="ir-value"><i class="fas fa-phone me-1" style="color:var(--blue); font-size:.75rem;"></i>{{ shipment.receiver_phone }}</span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Email</span>
+              <span class="ir-value"><i class="fas fa-envelope me-1" style="color:var(--blue); font-size:.75rem;"></i>{{ shipment.receiver_email }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━ SHIPMENT / PACKAGE / HANDLING ━━━━━━━━━━ -->
+<section class="section section-steel">
+  <div class="container">
+    <div class="row g-3">
+
+      <!-- Shipment Details -->
+      <div class="col-md-4">
+        <div class="panel h-100">
+          <div class="panel-header"><i class="fas fa-file-invoice"></i>Shipment Details</div>
+          <div class="panel-body">
+            <div class="info-row">
+              <span class="ir-label">Service</span>
+              <span class="ir-value">
+                <span class="badge-sc badge-priority me-1">{{ shipment.get_priority_level_display }}</span>
+                {{ shipment.get_shipment_type_display }}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Payment</span>
+              <span class="ir-value">
+                <span class="{{ shipment.get_payment_status_class }}">{{ shipment.get_payment_status_display }}</span>
+                {% if shipment.payment_status == 'paid' and shipment.payment_date %}
+                <small style="display:block; color:var(--gray); font-size:.72rem; margin-top:2px;">
+                  Paid {{ shipment.payment_date|date:"M d, Y" }}
+                </small>
+                {% endif %}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Shipping</span>
+              <span class="ir-value">${{ shipment.shipping_cost }}</span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Insurance</span>
+              <span class="ir-value">${{ shipment.insurance_amount }}</span>
+            </div>
+            {% if shipment.taxes %}
+            <div class="info-row">
+              <span class="ir-label">Taxes</span>
+              <span class="ir-value">${{ shipment.taxes }}</span>
+            </div>
+            {% endif %}
+            <div class="info-row">
+              <span class="ir-label">Total</span>
+              <span class="ir-value" style="font-family:var(--fs); font-weight:700; font-size:1rem; color:var(--navy);">${{ shipment.total_amount }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Package Details -->
+      <div class="col-md-4">
+        <div class="panel h-100">
+          <div class="panel-header"><i class="fas fa-cube"></i>Package Details</div>
+          <div class="panel-body">
+            <div class="info-row">
+              <span class="ir-label">Description</span>
+              <span class="ir-value">{{ shipment.package_description|truncatewords:15 }}</span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Weight</span>
+              <span class="ir-value">
+                {{ shipment.weight }} kg
+                {% if shipment.volume_weight %}
+                <small style="display:block; color:var(--gray); font-size:.72rem;">Volumetric: {{ shipment.volume_weight }} kg</small>
+                {% endif %}
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Dimensions</span>
+              <span class="ir-value">{{ shipment.dimensions|default:"Not specified" }}</span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Declared Value</span>
+              <span class="ir-value">${{ shipment.declared_value }}</span>
+            </div>
+            <div class="info-row">
+              <span class="ir-label">Quantity</span>
+              <span class="ir-value">{{ shipment.package_quantity }}</span>
+            </div>
+            {% if shipment.fragile or shipment.hazardous or shipment.requires_dangerous_goods_declaration %}
+            <div class="info-row">
+              <span class="ir-label">Flags</span>
+              <span class="ir-value" style="display:flex; gap:6px; flex-wrap:wrap;">
+                {% if shipment.fragile %}
+                <span class="badge-sc badge-warning"><i class="fas fa-exclamation-triangle me-1"></i>Fragile</span>
+                {% endif %}
+                {% if shipment.hazardous %}
+                <span class="badge-sc badge-danger"><i class="fas fa-radiation me-1"></i>Hazardous</span>
+                {% endif %}
+                {% if shipment.requires_dangerous_goods_declaration %}
+                <span class="badge-sc badge-dark"><i class="fas fa-file-contract me-1"></i>DGD</span>
+                {% endif %}
+              </span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Special Handling -->
+      <div class="col-md-4">
+        <div class="panel h-100">
+          <div class="panel-header"><i class="fas fa-info-circle"></i>Special Handling</div>
+          <div class="panel-body">
+            <div class="info-row">
+              <span class="ir-label">Signature</span>
+              <span class="ir-value">
+                <i class="fas {% if shipment.signature_required %}fa-check-circle{% else %}fa-times-circle{% endif %} me-1"
+                   style="color:{% if shipment.signature_required %}var(--green){% else %}var(--red){% endif %}; font-size:.85rem;"></i>
+                {{ shipment.signature_required|yesno:"Required,Not Required" }}
+              </span>
+            </div>
+            {% if shipment.temperature_range %}
+            <div class="info-row">
+              <span class="ir-label">Temperature</span>
+              <span class="ir-value"><i class="fas fa-thermometer-half me-1" style="color:var(--blue);"></i>{{ shipment.temperature_range }}</span>
+            </div>
+            {% endif %}
+            {% if shipment.special_instructions %}
+            <div class="info-row">
+              <span class="ir-label">Instructions</span>
+              <span class="ir-value" style="font-size:.82rem; line-height:1.65;">{{ shipment.special_instructions|linebreaks }}</span>
+            </div>
+            {% endif %}
+            {% if shipment.delivery_attempts > 0 %}
+            <div class="info-row">
+              <span class="ir-label">Attempts</span>
+              <span class="ir-value" style="color:var(--amber);">
+                <i class="fas fa-redo me-1"></i>{{ shipment.delivery_attempts }} attempt(s)
+              </span>
+            </div>
+            {% endif %}
+            {% if shipment.delivery_proof %}
+            <div class="info-row" style="border-bottom:none; padding-top:16px;">
+              <a href="{{ shipment.delivery_proof.url }}" target="_blank" class="btn-action" style="padding:10px 16px;">
+                <i class="fas fa-download"></i> Download Proof of Delivery
+              </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━ DOCUMENTS + TIMELINE ━━━━━━━━━━ -->
+<section class="section section-white">
+  <div class="container">
+    <div class="row g-3">
+
+      <!-- Documents -->
+      <div class="col-lg-4">
+        <div class="panel h-100">
+          <div class="panel-header"><i class="fas fa-file-alt"></i>Documents</div>
+          <div class="panel-body">
+            {% if shipment.documents.all %}
+              {% for doc in shipment.documents.all %}
+              <div class="doc-item">
+                <div class="doc-icon"><i class="fas fa-file-{{ doc.document_type }}"></i></div>
+                <div class="doc-info">
+                  <div class="doc-name">{{ doc.get_document_type_display }}</div>
+                  <div class="doc-date">{{ doc.uploaded_at|date:"M d, Y" }}</div>
+                </div>
+                <a href="{{ doc.file.url }}" target="_blank" class="doc-dl"><i class="fas fa-download"></i></a>
+              </div>
+              {% endfor %}
+            {% else %}
+              <div class="doc-empty">
+                <i class="fas fa-folder-open"></i>
+                <p>No documents attached</p>
+              </div>
+            {% endif %}
+
+            {% if shipment.dangerous_goods_declaration %}
+            <div class="doc-item">
+              <div class="doc-icon" style="color:var(--red);"><i class="fas fa-radiation"></i></div>
+              <div class="doc-info">
+                <div class="doc-name">Dangerous Goods Declaration</div>
+                <div class="doc-date">Hazardous materials</div>
+              </div>
+              <a href="{{ shipment.dangerous_goods_declaration.url }}" target="_blank" class="doc-dl"><i class="fas fa-download"></i></a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Tracking History -->
+      <div class="col-lg-8">
+        <div class="panel h-100">
+          <div class="panel-header"><i class="fas fa-history"></i>Tracking History</div>
+          <div class="panel-body">
+            {% if status_updates %}
+            <div class="timeline">
+              {% for update in status_updates %}
+              <div class="tl-item {% if forloop.first %}tl-current{% endif %}">
+                <div class="tl-dot"></div>
+                <div class="tl-head">
+                  <div>
+                    <span class="tl-tag status-{{ update.status }}">{{ update.get_status_display }}</span>
+                    {% if update.note %}
+                    <p class="tl-note">{{ update.note }}</p>
+                    {% endif %}
+                    <p class="tl-loc">
+                      <i class="fas fa-map-marker-alt"></i>
+                      {{ update.location }}
+                      {% if update.latitude and update.longitude %}
+                      <a href="{{ update.get_google_maps_url }}" target="_blank">
+                        <i class="fas fa-external-link-alt"></i> Map
+                      </a>
+                      {% endif %}
+                    </p>
+                    {% if update.updated_by %}
+                    <p class="tl-by"><i class="fas fa-user me-1" style="color:var(--blue);"></i>{{ update.updated_by.username }}</p>
+                    {% endif %}
+                  </div>
+                  <div class="tl-date">
+                    <div class="tl-date-main">{{ update.timestamp|date:"M d" }}</div>
+                    <div class="tl-date-time">{{ update.timestamp|date:"H:i" }}</div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:48px 0;">
+              <i class="fas fa-clock" style="font-size:2.5rem; color:var(--border); display:block; margin-bottom:12px;"></i>
+              <p style="font-family:var(--fs); font-size:.88rem; font-weight:700; color:var(--navy); margin-bottom:6px;">No tracking updates yet</p>
+              <p style="font-size:.8rem; color:var(--gray);">Information will appear here once the shipment is processed.</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ━━━━━━━━━━ NOTES + ACTIONS ━━━━━━━━━━ -->
+<section class="section section-steel">
+  <div class="container">
+    <div class="row g-3">
+
+      <!-- Notes -->
+      <div class="col-lg-8">
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-sticky-note"></i>Notes &amp; Instructions</div>
+          <div class="panel-body">
+            {% if shipment.notes %}
+            <div class="note-alert">
+              <strong><i class="fas fa-info-circle me-1"></i>Customer Notes</strong>
+              {{ shipment.notes|linebreaks }}
+            </div>
+            {% endif %}
+
+            {% if shipment.internal_notes %}
+            <div class="note-alert internal">
+              <strong><i class="fas fa-lock me-1"></i>Internal Notes (Staff Only)</strong>
+              {{ shipment.internal_notes|linebreaks }}
+            </div>
+            {% endif %}
+
+            {% if shipment.assigned_driver %}
+            <div class="info-row" style="border:none; padding:0;">
+              <span class="ir-label">Driver</span>
+              <span class="ir-value">
+                <i class="fas fa-truck me-1" style="color:var(--blue);"></i>
+                {{ shipment.assigned_driver.get_full_name|default:shipment.assigned_driver.username }}
+              </span>
+            </div>
+            {% endif %}
+            {% if shipment.assigned_agent %}
+            <div class="info-row" style="border:none; padding-top:8px;">
+              <span class="ir-label">Agent</span>
+              <span class="ir-value">
+                <i class="fas fa-user-tie me-1" style="color:var(--blue);"></i>
+                {{ shipment.assigned_agent.get_full_name|default:shipment.assigned_agent.username }}
+              </span>
+            </div>
+            {% endif %}
+
+            {% if not shipment.notes and not shipment.internal_notes and not shipment.assigned_driver %}
+            <p style="font-size:.84rem; color:var(--gray); text-align:center; padding:24px 0;">No additional notes or instructions.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="col-lg-4">
+        <div class="panel">
+          <div class="panel-header"><i class="fas fa-bolt"></i>Quick Actions</div>
+          <div class="panel-body">
+            <div class="action-grid">
+              <a href="{% url 'track_shipment' %}" class="btn-action primary">
+                <i class="fas fa-search"></i> Track Another Shipment
+              </a>
+
+              {% if outstanding > 0 %}
+              <a href="{% url 'upload_payment_proof' shipment.tracking_code %}" class="btn-action success">
+                <i class="fas fa-credit-card"></i> Pay Now (${{ outstanding|floatformat:2 }})
+              </a>
+              {% endif %}
+
+              <a href="{% url 'contact' %}" class="btn-action">
+                <i class="fas fa-headset"></i> Contact Support
+              </a>
+
+              <a href="javascript:window.print()" class="btn-action">
+                <i class="fas fa-print"></i> Print Details
+              </a>
+
+              <button class="btn-action" onclick="copyTrackingCode()">
+                <i class="fas fa-copy"></i> Copy Tracking Code
+              </button>
+            </div>
+
+            <div class="update-note">
+              <i class="fas fa-clock"></i>
+              Updated {{ shipment.updated_at|timesince }} ago
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- Image Modal -->
+<div class="modal fade" id="imageModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Goods Image</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center">
+        <img src="" id="modalImage" class="img-fluid" alt="Goods">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Floating Pay Button (visible when outstanding > 0) -->
+{% if outstanding > 0 %}
+<a href="{% url 'upload_payment_proof' shipment.tracking_code %}" class="floating-pay-btn">
+  <i class="fas fa-credit-card"></i>
+  Pay Now - ${{ outstanding|floatformat:2 }}
+</a>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyTrackingCode() {
+  const trackingCode = "{{ shipment.tracking_code }}";
+  const btn = event.target.closest('button');
+  const orig = btn.innerHTML;
+
+  navigator.clipboard.writeText(trackingCode).then(() => {
+    btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    btn.style.borderColor = 'var(--green)';
+    btn.style.color = 'var(--green)';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.borderColor = '';
+      btn.style.color = '';
+    }, 2000);
+  }).catch(() => {
+    alert('Failed to copy tracking code to clipboard');
+  });
+}
+
+function openModal(imageUrl) {
+  document.getElementById('modalImage').src = imageUrl;
+  var modal = new bootstrap.Modal(document.getElementById('imageModal'));
+  modal.show();
+}
+
+// Auto-refresh every 2 minutes when tab is visible
+setInterval(() => {
+  if (document.visibilityState === 'visible') {
+    location.reload();
+  }
+}, 120000);
+
+// Print state handlers
+window.addEventListener('beforeprint', () => document.body.classList.add('printing'));
+window.addEventListener('afterprint',  () => document.body.classList.remove('printing'));
+</script>
+{% endblock %}

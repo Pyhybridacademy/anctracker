@@ -1,0 +1,792 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact Us - {% if site_settings %}{{ site_settings.company_name }}{% else %}Global Logistics{% endif %}{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── Variables (mirrored from home) ── */
+:root {
+  --navy:    #0A1628;
+  --blue:    #1346A0;
+  --blue-lt: #1E5FBF;
+  --accent:  #F97316;
+  --steel:   #E8EDF5;
+  --gray:    #64748B;
+  --border:  #D1D9E8;
+  --warm:    #F8FAFC;
+  --fs: 'Syne', sans-serif;
+  --fb: 'Inter', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--fb); background: var(--warm); color: var(--navy); font-weight: 300; -webkit-font-smoothing: antialiased; }
+
+/* ════════════════════════════
+   PAGE HERO — matches home hero style
+════════════════════════════ */
+.contact-hero {
+  background: var(--navy);
+  position: relative; overflow: hidden;
+  padding: 100px 0 80px; min-height: 420px;
+  display: flex; align-items: center;
+}
+.contact-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 60px 60px; pointer-events: none;
+}
+.contact-hero::after {
+  content: '';
+  position: absolute; top: -200px; right: -200px;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(19,70,160,.45) 0%, transparent 70%);
+  pointer-events: none;
+}
+/* Left accent glow */
+.contact-hero .glow-left {
+  position: absolute; bottom: -200px; left: -200px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(249,115,22,.12) 0%, transparent 70%);
+  pointer-events: none; z-index: 1;
+}
+.contact-hero-inner { position: relative; z-index: 2; }
+
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--fs); font-size: .65rem; font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 20px;
+}
+.hero-eyebrow::before {
+  content: ''; display: block; width: 28px; height: 2px; background: var(--accent);
+}
+.contact-hero-title {
+  font-family: var(--fs);
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  font-weight: 800; color: #fff;
+  line-height: 1.02; letter-spacing: -.02em; margin-bottom: 18px;
+}
+.contact-hero-title span { color: var(--accent); }
+.contact-hero-sub {
+  font-size: .95rem; color: rgba(255,255,255,.5);
+  font-weight: 300; line-height: 1.8; max-width: 460px;
+}
+
+/* Breadcrumb strip at bottom of hero */
+.hero-breadcrumb {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 3;
+  background: rgba(255,255,255,.04);
+  border-top: 1px solid rgba(255,255,255,.07);
+  padding: .75rem 0;
+}
+.hero-breadcrumb .breadcrumb { margin: 0; }
+.hero-breadcrumb .breadcrumb-item a {
+  color: rgba(255,255,255,.4); text-decoration: none;
+  font-size: .72rem; font-family: var(--fs); font-weight: 500;
+  letter-spacing: .06em; transition: color .2s;
+}
+.hero-breadcrumb .breadcrumb-item a:hover { color: var(--accent); }
+.hero-breadcrumb .breadcrumb-item.active {
+  color: rgba(255,255,255,.2); font-size: .72rem;
+}
+.hero-breadcrumb .breadcrumb-item + .breadcrumb-item::before { color: rgba(255,255,255,.18); }
+
+/* Quick contact pills in hero */
+.hero-contact-pills { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 32px; }
+.hero-pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  padding: 9px 16px; font-size: .78rem; color: rgba(255,255,255,.7);
+  font-family: var(--fb); text-decoration: none; transition: all .25s;
+}
+.hero-pill i { color: var(--accent); font-size: .85rem; }
+.hero-pill:hover { background: rgba(255,255,255,.1); color: #fff; border-color: rgba(255,255,255,.2); }
+
+/* ════════════════════════════
+   SECTION HELPERS (from home)
+════════════════════════════ */
+.section { padding: 88px 0; }
+.section-light { background: var(--warm); }
+.section-steel { background: var(--steel); }
+.section-navy  { background: var(--navy); }
+
+.sec-head { text-align: center; margin-bottom: 56px; }
+.sec-eye {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--fs); font-size: .65rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--blue); margin-bottom: 14px;
+}
+.sec-eye::before { content: ''; width: 20px; height: 2px; background: var(--blue); display: block; }
+.sec-eye.inv { color: var(--accent); }
+.sec-eye.inv::before { background: var(--accent); }
+.sec-title {
+  font-family: var(--fs); font-size: clamp(1.8rem, 3vw, 2.6rem);
+  font-weight: 800; line-height: 1.1; color: var(--navy); margin-bottom: 14px;
+}
+.sec-title span { color: var(--blue); }
+.sec-title.inv { color: #fff; }
+.sec-title.inv span { color: var(--accent); }
+.sec-sub { font-size: .92rem; color: var(--gray); font-weight: 300; line-height: 1.8; max-width: 480px; margin: 0 auto; }
+.sec-sub.inv { color: rgba(255,255,255,.45); }
+
+/* ════════════════════════════
+   CONTACT CARDS — 3-col, matches services-grid style
+════════════════════════════ */
+.contact-cards-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--border);
+}
+.contact-card {
+  padding: 44px 36px; border-right: 1px solid var(--border);
+  transition: background .25s; position: relative; text-align: left;
+}
+.contact-card:last-child { border-right: none; }
+.contact-card:hover { background: var(--steel); }
+.contact-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: transparent; transition: background .3s;
+}
+.contact-card:hover::before { background: var(--blue); }
+
+.cc-icon {
+  width: 54px; height: 54px; background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 22px; font-size: 1.25rem; color: var(--accent);
+  transition: all .3s;
+}
+.contact-card:hover .cc-icon { background: var(--blue); }
+
+.cc-tag {
+  font-family: var(--fs); font-size: .6rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--blue); display: block; margin-bottom: 8px;
+}
+.cc-title {
+  font-family: var(--fs); font-size: 1.3rem; font-weight: 700;
+  color: var(--navy); margin-bottom: 14px;
+}
+.cc-detail {
+  font-size: .85rem; color: var(--gray); line-height: 1.75; margin-bottom: 6px;
+}
+.cc-detail strong { color: var(--navy); font-weight: 500; display: block; margin-bottom: 2px; font-size: .78rem; letter-spacing: .04em; }
+.cc-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--fs); font-size: .68rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--blue); text-decoration: none;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 2px; transition: all .2s; margin-top: 16px;
+}
+.cc-link:hover { color: var(--accent); border-color: var(--accent); }
+
+/* ════════════════════════════
+   FORM + INFO SECTION
+════════════════════════════ */
+.form-section { padding: 88px 0; background: var(--warm); }
+
+/* Form panel */
+.form-panel {
+  background: #fff; border: 1px solid var(--border);
+  padding: 0; overflow: hidden;
+}
+.form-panel-header {
+  background: var(--navy); padding: 22px 32px;
+  display: flex; align-items: center; gap: 12px;
+}
+.form-panel-header i { color: var(--accent); font-size: 1rem; }
+.form-panel-header h3 {
+  font-family: var(--fs); font-size: .88rem; font-weight: 700;
+  color: #fff; margin: 0; letter-spacing: .06em; text-transform: uppercase;
+}
+.form-panel-body { padding: 36px 32px; }
+
+.field-label {
+  font-family: var(--fs); font-size: .65rem; font-weight: 700;
+  letter-spacing: .16em; text-transform: uppercase;
+  color: var(--navy); display: block; margin-bottom: 7px;
+}
+.field-input {
+  width: 100%; border: 1px solid var(--border); outline: none;
+  padding: 12px 16px; font-family: var(--fb); font-size: .9rem;
+  color: var(--navy); background: #fff; font-weight: 400;
+  transition: border-color .2s; border-radius: 0; appearance: none;
+}
+.field-input:focus { border-color: var(--blue); }
+.field-input::placeholder { color: #aab; }
+select.field-input { cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%231346A0' fill='none' stroke-width='1.5'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+.submit-btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--blue); color: #fff; border: none;
+  padding: 14px 32px; font-family: var(--fs); font-size: .72rem;
+  font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  cursor: pointer; transition: background .25s;
+}
+.submit-btn:hover { background: var(--accent); }
+
+/* Info sidebar panels */
+.info-panel {
+  background: #fff; border: 1px solid var(--border); margin-bottom: 1px;
+}
+.info-panel-header {
+  background: var(--navy); padding: 18px 24px;
+  display: flex; align-items: center; gap: 10px;
+}
+.info-panel-header i { color: var(--accent); font-size: .95rem; }
+.info-panel-header h4 {
+  font-family: var(--fs); font-size: .78rem; font-weight: 700;
+  color: #fff; margin: 0; letter-spacing: .08em; text-transform: uppercase;
+}
+.info-panel-body { padding: 24px; }
+
+.info-row {
+  display: flex; gap: 14px; padding: 12px 0;
+  border-bottom: 1px solid var(--border); align-items: flex-start;
+}
+.info-row:last-child { border-bottom: none; }
+.info-row-icon {
+  width: 36px; height: 36px; background: var(--steel);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: .85rem; color: var(--blue);
+}
+.info-row-text strong {
+  font-family: var(--fs); font-size: .7rem; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--navy); display: block; margin-bottom: 3px;
+}
+.info-row-text span { font-size: .84rem; color: var(--gray); line-height: 1.6; }
+
+/* Hours grid inside panel */
+.hours-grid { display: grid; gap: 0; }
+.hours-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border); font-size: .84rem;
+}
+.hours-row:last-child { border-bottom: none; }
+.hours-day { color: var(--navy); font-weight: 500; font-size: .82rem; }
+.hours-time { color: var(--blue); font-family: var(--fs); font-weight: 700; font-size: .78rem; }
+.hours-time.closed { color: var(--gray); font-weight: 400; }
+
+/* Hotline alert — matches hero card style */
+.hotline-panel {
+  background: var(--navy); border: 1px solid rgba(255,255,255,.08);
+  padding: 24px;
+}
+.hotline-label {
+  font-family: var(--fs); font-size: .62rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--accent); display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.hotline-label::before { content: ''; width: 16px; height: 2px; background: var(--accent); display: block; }
+.hotline-number {
+  font-family: var(--fs); font-size: 1.6rem; font-weight: 800;
+  color: #fff; display: block; margin-bottom: 8px;
+}
+.hotline-note { font-size: .8rem; color: rgba(255,255,255,.4); line-height: 1.6; }
+
+/* ════════════════════════════
+   MAP SECTION — navy bg like industries
+════════════════════════════ */
+.map-section { padding: 0; }
+.map-wrap { position: relative; }
+.map-wrap iframe { display: block; }
+.map-overlay-card {
+  position: absolute; top: 40px; left: 40px; z-index: 10;
+  background: var(--navy); border: 1px solid rgba(255,255,255,.1);
+  padding: 28px 28px 24px; max-width: 280px;
+  box-shadow: 0 24px 60px rgba(10,22,40,.4);
+}
+.map-overlay-tag {
+  font-family: var(--fs); font-size: .6rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--accent); display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+}
+.map-overlay-tag::before { content: ''; width: 14px; height: 2px; background: var(--accent); display: block; }
+.map-overlay-name {
+  font-family: var(--fs); font-size: 1rem; font-weight: 800; color: #fff; margin-bottom: 8px;
+}
+.map-overlay-addr { font-size: .8rem; color: rgba(255,255,255,.45); line-height: 1.65; margin-bottom: 16px; }
+.map-overlay-link {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--fs); font-size: .65rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--accent); text-decoration: none; transition: gap .2s;
+}
+.map-overlay-link:hover { gap: 12px; }
+
+/* ════════════════════════════
+   FAQ — matches stats-grid style
+════════════════════════════ */
+.faq-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 1px; background: var(--border);
+}
+.faq-item {
+  background: #fff; padding: 0; overflow: hidden;
+}
+.faq-btn {
+  width: 100%; background: none; border: none; text-align: left;
+  padding: 22px 28px; font-family: var(--fs); font-size: .9rem;
+  font-weight: 700; color: var(--navy); cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: background .2s; gap: 16px;
+}
+.faq-btn:hover { background: var(--steel); }
+.faq-btn.active { background: var(--navy); color: #fff; }
+.faq-btn.active i { color: var(--accent); transform: rotate(45deg); }
+.faq-btn i { color: var(--blue); font-size: .85rem; transition: all .3s; flex-shrink: 0; }
+.faq-body {
+  font-size: .86rem; color: var(--gray); line-height: 1.8;
+  max-height: 0; overflow: hidden; transition: max-height .35s ease, padding .3s ease;
+  border-top: none; padding: 0 28px;
+}
+.faq-body.open { max-height: 200px; padding: 16px 28px 22px; border-top: 1px solid var(--border); }
+
+/* ════════════════════════════
+   CTA BAR (identical to home)
+════════════════════════════ */
+.cta-bar { background: var(--blue); padding: 60px 0; }
+.cta-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
+}
+.cta-text h3 {
+  font-family: var(--fs); font-size: 1.9rem; font-weight: 800;
+  color: #fff; margin-bottom: 6px; line-height: 1.15;
+}
+.cta-text p { font-size: .9rem; color: rgba(255,255,255,.6); font-weight: 300; }
+.btn-cta-white {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: #fff; color: var(--blue); border: 2px solid #fff;
+  padding: 14px 32px; font-family: var(--fs); font-size: .75rem;
+  font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+  text-decoration: none; transition: all .25s; white-space: nowrap;
+}
+.btn-cta-white:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ════════════════════════════
+   RESPONSIVE
+════════════════════════════ */
+@media (max-width: 1023px) {
+  .contact-cards-grid { grid-template-columns: 1fr; }
+  .contact-card { border-right: none; border-bottom: 1px solid var(--border); }
+  .contact-card:last-child { border-bottom: none; }
+  .faq-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 767px) {
+  .section { padding: 60px 0; }
+  .contact-hero { padding: 72px 0 72px; min-height: auto; }
+  .form-panel-body { padding: 24px 20px; }
+  .map-overlay-card { position: static; max-width: 100%; margin: 0; }
+  .cta-inner { flex-direction: column; align-items: flex-start; }
+  .hero-contact-pills { flex-direction: column; }
+}
+</style>
+
+<!-- ════════════════════════════════════
+     HERO
+════════════════════════════════════ -->
+<section class="contact-hero">
+  <div class="glow-left"></div>
+  <div class="container contact-hero-inner">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <span class="hero-eyebrow">We're Here to Help</span>
+        <h1 class="contact-hero-title">
+          Get in <span>Touch</span><br>With Our Team
+        </h1>
+        <p class="contact-hero-sub">
+          Our logistics experts are available around the clock to answer questions, resolve issues, and help you optimise your supply chain.
+        </p>
+        <div class="hero-contact-pills">
+          <a href="tel:{% if site_settings %}{{ site_settings.phone_number }}{% else %}+15551234567{% endif %}" class="hero-pill">
+            <i class="fas fa-phone"></i>
+            {% if site_settings %}{{ site_settings.phone_number }}{% else %}+1 (555) 123-4567{% endif %}
+          </a>
+          <a href="mailto:{% if site_settings %}{{ site_settings.email }}{% else %}info@logistics.com{% endif %}" class="hero-pill">
+            <i class="fas fa-envelope"></i>
+            {% if site_settings %}{{ site_settings.email }}{% else %}info@logistics.com{% endif %}
+          </a>
+        </div>
+      </div>
+      <div class="col-lg-5 offset-lg-1">
+        <!-- Stats strip matching home hero stats -->
+        <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:rgba(255,255,255,.08);">
+          <div style="background:rgba(255,255,255,.04); padding:28px 24px;">
+            <span style="font-family:var(--fs); font-size:2rem; font-weight:800; color:#fff; display:block; line-height:1;">24<span style="color:var(--accent);">/7</span></span>
+            <span style="font-size:.72rem; color:rgba(255,255,255,.4); display:block; margin-top:5px;">Support Available</span>
+          </div>
+          <div style="background:rgba(255,255,255,.04); padding:28px 24px;">
+            <span style="font-family:var(--fs); font-size:2rem; font-weight:800; color:#fff; display:block; line-height:1;">1<span style="color:var(--accent);">hr</span></span>
+            <span style="font-size:.72rem; color:rgba(255,255,255,.4); display:block; margin-top:5px;">Response Time</span>
+          </div>
+          <div style="background:rgba(255,255,255,.04); padding:28px 24px;">
+            <span style="font-family:var(--fs); font-size:2rem; font-weight:800; color:#fff; display:block; line-height:1;">150<span style="color:var(--accent);">+</span></span>
+            <span style="font-size:.72rem; color:rgba(255,255,255,.4); display:block; margin-top:5px;">Countries Supported</span>
+          </div>
+          <div style="background:rgba(255,255,255,.04); padding:28px 24px;">
+            <span style="font-family:var(--fs); font-size:2rem; font-weight:800; color:#fff; display:block; line-height:1;">99<span style="color:var(--accent);">%</span></span>
+            <span style="font-size:.72rem; color:rgba(255,255,255,.4); display:block; margin-top:5px;">Customer Satisfaction</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-breadcrumb">
+    <div class="container">
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+          <li class="breadcrumb-item active" aria-current="page">Contact Us</li>
+        </ol>
+      </nav>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     CONTACT CARDS — 3-col like services-grid
+════════════════════════════════════ -->
+<section class="section section-light">
+  <div class="container">
+    <div class="sec-head">
+      <span class="sec-eye">Reach Us</span>
+      <h2 class="sec-title">Contact <span>Information</span></h2>
+      <p class="sec-sub">Multiple channels to get the support you need, whenever you need it</p>
+    </div>
+    <div class="contact-cards-grid">
+
+      <div class="contact-card">
+        <div class="cc-icon"><i class="fas fa-phone-alt"></i></div>
+        <span class="cc-tag">Direct Line</span>
+        <h3 class="cc-title">Phone Support</h3>
+        <div class="cc-detail">
+          <strong>Customer Service</strong>
+          {% if site_settings %}{{ site_settings.phone_number }}{% else %}+1 (555) 123-4567{% endif %}
+        </div>
+        <div class="cc-detail">
+          <strong>Emergency 24/7</strong>
+          {% if site_settings %}{{ site_settings.phone_number }}{% else %}+1 (555) 987-6543{% endif %}
+        </div>
+        <a href="tel:{% if site_settings %}{{ site_settings.phone_number }}{% else %}+15551234567{% endif %}" class="cc-link">
+          <i class="fas fa-arrow-right"></i> Call Now
+        </a>
+      </div>
+
+      <div class="contact-card">
+        <div class="cc-icon"><i class="fas fa-envelope-open-text"></i></div>
+        <span class="cc-tag">Email</span>
+        <h3 class="cc-title">Email Us</h3>
+        <div class="cc-detail">
+          <strong>General Inquiries</strong>
+          {% if site_settings %}{{ site_settings.email }}{% else %}info@logistics.com{% endif %}
+        </div>
+        <div class="cc-detail">
+          <strong>Support Team</strong>
+          {% if site_settings %}support@{{ site_settings.email|cut:"info@" }}{% else %}support@logistics.com{% endif %}
+        </div>
+        <a href="mailto:{% if site_settings %}{{ site_settings.email }}{% else %}info@logistics.com{% endif %}" class="cc-link">
+          <i class="fas fa-arrow-right"></i> Send Email
+        </a>
+      </div>
+
+      <div class="contact-card">
+        <div class="cc-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <span class="cc-tag">Headquarters</span>
+        <h3 class="cc-title">Visit Us</h3>
+        <div class="cc-detail">
+          <strong>Address</strong>
+          {% if site_settings %}{{ site_settings.address }}{% else %}123 Logistics Street, Business District, City 12345{% endif %}
+        </div>
+        <div class="cc-detail">
+          <strong>Hours</strong>
+          Mon – Fri, 8:00 AM – 8:00 PM
+        </div>
+        <a href="https://maps.google.com" target="_blank" class="cc-link">
+          <i class="fas fa-arrow-right"></i> Get Directions
+        </a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     FORM + SIDEBAR
+════════════════════════════════════ -->
+<section class="section section-steel">
+  <div class="container">
+    <div class="row g-4 align-items-start">
+
+      <!-- LEFT: Form -->
+      <div class="col-lg-7">
+        <div class="form-panel">
+          <div class="form-panel-header">
+            <i class="fas fa-paper-plane"></i>
+            <h3>Send Us a Message</h3>
+          </div>
+          <div class="form-panel-body">
+            <form method="post" action="{% url 'contact_submit' %}">
+              {% csrf_token %}
+              <div class="row g-4">
+
+                <div class="col-md-6">
+                  <label class="field-label" for="name">Full Name *</label>
+                  <input type="text" class="field-input" id="name" name="name" placeholder="John Smith" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="field-label" for="email">Email Address *</label>
+                  <input type="email" class="field-input" id="email" name="email" placeholder="john@company.com" required>
+                </div>
+
+                <div class="col-md-6">
+                  <label class="field-label" for="phone">Phone Number</label>
+                  <input type="tel" class="field-input" id="phone" name="phone" placeholder="+1 (555) 000-0000">
+                </div>
+
+                <div class="col-md-6">
+                  <label class="field-label" for="subject">Subject *</label>
+                  <select class="field-input" id="subject" name="subject" required>
+                    <option value="" disabled selected>Select a topic</option>
+                    <option value="tracking">Shipment Tracking</option>
+                    <option value="quote">Request a Quote</option>
+                    <option value="air">Air Freight</option>
+                    <option value="ocean">Ocean Freight</option>
+                    <option value="road">Road Transport</option>
+                    <option value="customs">Customs Clearance</option>
+                    <option value="other">Other Inquiry</option>
+                  </select>
+                </div>
+
+                <div class="col-12">
+                  <label class="field-label" for="message">Message *</label>
+                  <textarea class="field-input" id="message" name="message" rows="5" placeholder="Describe your logistics requirements or inquiry…" required style="resize:vertical;"></textarea>
+                </div>
+
+                <div class="col-12">
+                  <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i> Send Message
+                  </button>
+                </div>
+
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Info panels -->
+      <div class="col-lg-5">
+
+        <!-- Business hours -->
+        <div class="info-panel">
+          <div class="info-panel-header">
+            <i class="fas fa-clock"></i>
+            <h4>Business Hours</h4>
+          </div>
+          <div class="info-panel-body">
+            <div class="hours-grid">
+              <div class="hours-row">
+                <span class="hours-day">Monday – Friday</span>
+                <span class="hours-time">8:00 AM – 8:00 PM</span>
+              </div>
+              <div class="hours-row">
+                <span class="hours-day">Saturday</span>
+                <span class="hours-time">9:00 AM – 5:00 PM</span>
+              </div>
+              <div class="hours-row">
+                <span class="hours-day">Sunday</span>
+                <span class="hours-time closed">Emergency Only</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hotline panel — navy like hero/modal -->
+        <div class="hotline-panel" style="margin-top:1px;">
+          <span class="hotline-label"><i class="fas fa-headset"></i> 24/7 Emergency Hotline</span>
+          <span class="hotline-number">{% if site_settings %}{{ site_settings.phone_number }}{% else %}+1 (555) 987-6543{% endif %}</span>
+          <p class="hotline-note">For urgent shipment issues, delivery emergencies, or critical supply chain support — available around the clock.</p>
+        </div>
+
+        <!-- Contact details rows -->
+        <div class="info-panel" style="margin-top:1px;">
+          <div class="info-panel-header">
+            <i class="fas fa-address-card"></i>
+            <h4>Quick Details</h4>
+          </div>
+          <div class="info-panel-body" style="padding-top:8px; padding-bottom:8px;">
+            <div class="info-row">
+              <div class="info-row-icon"><i class="fas fa-building"></i></div>
+              <div class="info-row-text">
+                <strong>Headquarters</strong>
+                <span>{% if site_settings %}{{ site_settings.address }}{% else %}123 Logistics Street, Business District{% endif %}</span>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-row-icon"><i class="fas fa-phone"></i></div>
+              <div class="info-row-text">
+                <strong>Main Number</strong>
+                <span>{% if site_settings %}{{ site_settings.phone_number }}{% else %}+1 (555) 123-4567{% endif %}</span>
+              </div>
+            </div>
+            <div class="info-row">
+              <div class="info-row-icon"><i class="fas fa-envelope"></i></div>
+              <div class="info-row-text">
+                <strong>Email</strong>
+                <span>{% if site_settings %}{{ site_settings.email }}{% else %}info@logistics.com{% endif %}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     MAP
+════════════════════════════════════ -->
+<div class="map-section">
+  <div style="position:relative;">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3024.177858804427!2d-73.98784468459418!3d40.70555197933205!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89c25a315cdf4c9b%3A0x8b934de5cae6f7a!2sLogistics%20District!5e0!3m2!1sen!2sus!4v1645567890123!5m2!1sen!2sus"
+      width="100%" height="440" style="border:0; display:block; filter:grayscale(20%) contrast(1.05);"
+      allowfullscreen="" loading="lazy">
+    </iframe>
+    <div class="map-overlay-card">
+      <span class="map-overlay-tag">Our Location</span>
+      <h4 class="map-overlay-name">{% if site_settings %}{{ site_settings.company_name }}{% else %}Global Logistics HQ{% endif %}</h4>
+      <p class="map-overlay-addr">{% if site_settings %}{{ site_settings.address }}{% else %}123 Logistics Street, Business District, City 12345{% endif %}</p>
+      <a href="https://maps.google.com" target="_blank" class="map-overlay-link">
+        Get Directions <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════
+     FAQ — 2-col bordered grid
+════════════════════════════════════ -->
+<section class="section section-light">
+  <div class="container">
+    <div class="sec-head">
+      <span class="sec-eye">Quick Answers</span>
+      <h2 class="sec-title">Frequently Asked <span>Questions</span></h2>
+      <p class="sec-sub">Common questions about our services and support channels</p>
+    </div>
+    <div class="faq-grid">
+
+      <div class="faq-item">
+        <button class="faq-btn active" data-target="faq1">
+          How do I track my shipment?
+          <i class="fas fa-plus"></i>
+        </button>
+        <div class="faq-body open" id="faq1">
+          Use our shipment tracker on the home page with your tracking number (format: TRK + 8 alphanumeric characters). You can also find it in your email confirmation or customer portal.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn" data-target="faq2">
+          What are your response times?
+          <i class="fas fa-plus"></i>
+        </button>
+        <div class="faq-body" id="faq2">
+          Our standard response time is within 1 hour during business hours. Emergency support is available 24/7 via our hotline for critical shipment issues.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn" data-target="faq3">
+          Do you offer customs clearance?
+          <i class="fas fa-plus"></i>
+        </button>
+        <div class="faq-body" id="faq3">
+          Yes, we provide full customs clearance services for all freight types. Our certified experts handle documentation, duties, and compliance across 150+ countries.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn" data-target="faq4">
+          How do I request a freight quote?
+          <i class="fas fa-plus"></i>
+        </button>
+        <div class="faq-body" id="faq4">
+          Fill out the contact form above selecting "Request a Quote" as the subject, or call our customer service line directly. We typically provide quotes within 2 business hours.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn" data-target="faq5">
+          What freight modes do you support?
+          <i class="fas fa-plus"></i>
+        </button>
+        <div class="faq-body" id="faq5">
+          We offer air freight, ocean freight (FCL & LCL), and road transport. Multi-modal solutions combining two or more modes are also available for complex supply chains.
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-btn" data-target="faq6">
+          Can you handle temperature-sensitive cargo?
+          <i class="fas fa-plus"></i>
+        </button>
+        <div class="faq-body" id="faq6">
+          Absolutely. We offer GDP-compliant cold chain solutions for pharmaceutical, food, and other temperature-sensitive goods with continuous monitoring and documentation.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ════════════════════════════════════
+     CTA BAR (identical to home)
+════════════════════════════════════ -->
+<div class="cta-bar">
+  <div class="container">
+    <div class="cta-inner">
+      <div class="cta-text">
+        <h3>Ready to optimise your supply chain?</h3>
+        <p>Get a free logistics consultation and quote for your business.</p>
+      </div>
+      <a href="#contact-form" class="btn-cta-white">
+        <i class="fas fa-paper-plane"></i> Send a Message
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+// FAQ accordion
+document.querySelectorAll('.faq-btn').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const targetId = this.getAttribute('data-target');
+    const body = document.getElementById(targetId);
+    const isOpen = this.classList.contains('active');
+
+    document.querySelectorAll('.faq-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.faq-body').forEach(b => b.classList.remove('open'));
+
+    if (!isOpen) {
+      this.classList.add('active');
+      body.classList.add('open');
+    }
+  });
+});
+</script>
+
+{% endblock %}

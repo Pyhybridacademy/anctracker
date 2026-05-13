@@ -1,0 +1,647 @@
+{% extends 'base.html' %}
+
+{% block title %}About Us - {% if site_settings %}{{ site_settings.company_name }}{% else %}Logistics Company{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0A1628;
+  --blue:    #1346A0;
+  --blue-lt: #1E5FBF;
+  --accent:  #F97316;
+  --steel:   #E8EDF5;
+  --gray:    #64748B;
+  --border:  #D1D9E8;
+  --warm:    #F8FAFC;
+  --fs: 'Syne', sans-serif;
+  --fb: 'Inter', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body { font-family: var(--fb); background: var(--warm); color: var(--navy); font-weight: 300; -webkit-font-smoothing: antialiased; }
+
+/* ── PAGE HERO ── */
+.page-hero {
+  background: var(--navy);
+  position: relative; overflow: hidden;
+  padding: 80px 0 72px;
+}
+.page-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+.page-hero::after {
+  content: '';
+  position: absolute; top: -150px; right: -150px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(19,70,160,.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-inner { position: relative; z-index: 2; text-align: center; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--fs); font-size: .65rem; font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 20px;
+}
+.hero-eyebrow::before { content: ''; width: 28px; height: 2px; background: var(--accent); display: block; }
+.hero-eyebrow::after  { content: ''; width: 28px; height: 2px; background: var(--accent); display: block; }
+.hero-title {
+  font-family: var(--fs); font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 800; color: #fff; line-height: 1.06;
+  letter-spacing: -.02em; margin-bottom: 16px;
+}
+.hero-title span { color: var(--accent); }
+.hero-sub {
+  font-size: .95rem; color: rgba(255,255,255,.5);
+  font-weight: 300; max-width: 520px; margin: 0 auto;
+  line-height: 1.8;
+}
+
+/* ── BREADCRUMB ── */
+.bc { background: rgba(255,255,255,.04); border-top: 1px solid rgba(255,255,255,.06); border-bottom: 1px solid rgba(255,255,255,.06); padding: 11px 0; }
+.bc ol { list-style: none; margin: 0; padding: 0; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.bc li { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); display: flex; align-items: center; gap: 8px; }
+.bc li::before { content: '/'; color: rgba(255,255,255,.15); }
+.bc li:first-child::before { display: none; }
+.bc a { color: rgba(255,255,255,.5); text-decoration: none; transition: color .2s; }
+.bc a:hover { color: var(--accent); }
+.bc li.cur { color: var(--accent); }
+
+/* ── SECTIONS ── */
+.section       { padding: 88px 0; }
+.section-light { background: var(--warm); }
+.section-steel { background: var(--steel); }
+.section-navy  { background: var(--navy); }
+.section-white { background: #fff; }
+
+.sec-head { text-align: center; margin-bottom: 56px; }
+.sec-eye {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--fs); font-size: .65rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--blue); margin-bottom: 14px;
+}
+.sec-eye::before { content: ''; width: 20px; height: 2px; background: var(--blue); display: block; }
+.sec-eye.inv { color: var(--accent); }
+.sec-eye.inv::before { background: var(--accent); }
+.sec-title {
+  font-family: var(--fs); font-size: clamp(2rem, 3.5vw, 2.8rem);
+  font-weight: 800; line-height: 1.1; color: var(--navy); margin-bottom: 14px;
+}
+.sec-title span { color: var(--blue); }
+.sec-title.inv { color: #fff; }
+.sec-title.inv span { color: var(--accent); }
+.sec-sub { font-size: .92rem; color: var(--gray); font-weight: 300; line-height: 1.8; max-width: 480px; margin: 0 auto; }
+.sec-sub.inv { color: rgba(255,255,255,.45); }
+
+/* ── ABOUT CONTENT PANEL ── */
+.about-panel {
+  border: 1px solid var(--border);
+  background: #fff;
+  padding: 52px 48px;
+}
+.about-title {
+  font-family: var(--fs); font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800; color: var(--navy); margin-bottom: 16px;
+}
+.about-body { font-size: .92rem; color: var(--gray); line-height: 1.85; font-weight: 300; margin-bottom: 0; }
+
+/* Mission / Vision split */
+.mv-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  border-top: 1px solid var(--border); margin-top: 40px;
+}
+.mv-cell {
+  padding: 32px 36px 32px 0;
+  border-right: 1px solid var(--border);
+}
+.mv-cell:last-child { border-right: none; padding-left: 36px; padding-right: 0; }
+.mv-icon {
+  width: 46px; height: 46px; background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: var(--accent); margin-bottom: 16px;
+}
+.mv-label {
+  font-family: var(--fs); font-size: .6rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase;
+  color: var(--blue); display: block; margin-bottom: 8px;
+}
+.mv-title {
+  font-family: var(--fs); font-size: 1.15rem; font-weight: 700;
+  color: var(--navy); margin-bottom: 10px;
+}
+.mv-text { font-size: .85rem; color: var(--gray); line-height: 1.75; font-weight: 300; }
+
+/* ── HISTORY PANEL ── */
+.history-panel {
+  border: 1px solid var(--border);
+  background: var(--navy);
+  padding: 52px 48px;
+  position: relative; overflow: hidden;
+}
+.history-panel::after {
+  content: '';
+  position: absolute; bottom: -80px; right: -80px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(19,70,160,.4) 0%, transparent 70%);
+  pointer-events: none;
+}
+.history-panel-inner { position: relative; z-index: 2; }
+.history-meta {
+  display: flex; gap: 28px; flex-wrap: wrap; margin-top: 28px;
+  padding-top: 24px; border-top: 1px solid rgba(255,255,255,.1);
+}
+.history-meta-item {
+  display: flex; align-items: center; gap: 10px;
+  font-size: .78rem; color: rgba(255,255,255,.45);
+}
+.history-meta-item i { color: var(--accent); }
+
+/* ── SPECIALIZATIONS — 3-col bordered ── */
+.spec-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--border);
+}
+.spec-cell {
+  padding: 44px 36px; border-right: 1px solid var(--border);
+  text-align: center; transition: background .25s;
+}
+.spec-cell:last-child { border-right: none; }
+.spec-cell:hover { background: var(--steel); }
+.spec-icon {
+  width: 70px; height: 70px; background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 22px; font-size: 1.4rem; color: var(--accent);
+  transition: all .3s;
+}
+.spec-cell:hover .spec-icon { background: var(--blue); }
+.spec-name {
+  font-family: var(--fs); font-size: 1rem; font-weight: 700;
+  color: var(--navy); margin-bottom: 12px;
+}
+.spec-desc { font-size: .82rem; color: var(--gray); line-height: 1.75; }
+
+/* ── LEADERSHIP — 3-col grid ── */
+.exec-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border: 1px solid var(--border); gap: 0;
+}
+.exec-cell {
+  border-right: 1px solid var(--border);
+  overflow: hidden; transition: background .25s;
+}
+.exec-cell:last-child { border-right: none; }
+.exec-photo-wrap { position: relative; overflow: hidden; }
+.exec-photo {
+  width: 100%; height: 260px; object-fit: cover;
+  display: block; transition: transform .5s ease;
+}
+.exec-cell:hover .exec-photo { transform: scale(1.04); }
+.exec-photo-placeholder {
+  width: 100%; height: 260px; background: var(--steel);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 4rem; color: var(--border);
+}
+.exec-info { padding: 28px 28px 32px; border-top: 1px solid var(--border); }
+.exec-name {
+  font-family: var(--fs); font-size: 1.05rem; font-weight: 700;
+  color: var(--navy); margin-bottom: 4px;
+}
+.exec-role {
+  font-size: .7rem; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--blue); font-weight: 600; display: block; margin-bottom: 12px;
+}
+.exec-bio { font-size: .82rem; color: var(--gray); line-height: 1.7; margin-bottom: 18px; }
+.btn-exec {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--gray); padding: 8px 18px;
+  font-family: var(--fs); font-size: .62rem; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  text-decoration: none; transition: all .22s;
+}
+.btn-exec:hover { border-color: var(--blue); color: var(--blue); }
+
+/* ── STATS — 4-col bordered ── */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid rgba(255,255,255,.1);
+}
+.stat-cell {
+  padding: 44px 32px; border-right: 1px solid rgba(255,255,255,.1);
+  text-align: center;
+}
+.stat-cell:last-child { border-right: none; }
+.stat-num {
+  font-family: var(--fs); font-size: 2.8rem; font-weight: 800;
+  color: #fff; display: block; line-height: 1; margin-bottom: 8px;
+}
+.stat-num em { font-style: normal; color: var(--accent); }
+.stat-label {
+  font-family: var(--fs); font-size: .82rem; font-weight: 600;
+  color: rgba(255,255,255,.75); margin-bottom: 5px;
+}
+.stat-note { font-size: .72rem; color: rgba(255,255,255,.35); }
+
+/* ── TECHNOLOGY — split ── */
+.tech-panel {
+  border: 1px solid var(--border); background: #fff;
+  padding: 52px 48px;
+}
+.tech-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 0; margin-top: 28px;
+  border-top: 1px solid var(--border);
+  border-left: 1px solid var(--border);
+}
+.tech-item {
+  padding: 24px 24px 24px 20px;
+  border-right: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; gap: 16px;
+  transition: background .25s;
+}
+.tech-item:hover { background: var(--steel); }
+.tech-icon {
+  width: 42px; height: 42px; background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .95rem; color: var(--accent); flex-shrink: 0;
+  transition: background .3s;
+}
+.tech-item:hover .tech-icon { background: var(--blue); }
+.tech-name {
+  font-family: var(--fs); font-size: .88rem; font-weight: 700;
+  color: var(--navy); margin-bottom: 4px;
+}
+.tech-desc { font-size: .78rem; color: var(--gray); line-height: 1.65; }
+
+/* tech visual */
+.tech-visual {
+  display: flex; align-items: center; justify-content: center;
+  padding-left: 40px;
+}
+.tech-ring-wrap {
+  position: relative; width: 200px; height: 200px;
+  display: flex; align-items: center; justify-content: center;
+}
+.tech-ring-wrap i { font-size: 4rem; color: var(--blue); position: relative; z-index: 2; }
+.t-ring {
+  position: absolute; inset: 0;
+  border: 2px solid rgba(19,70,160,.15);
+  border-radius: 50%;
+  animation: tpulse 3s infinite;
+}
+.t-ring.d1 { animation-delay: .5s; }
+.t-ring.d2 { animation-delay: 1s; }
+@keyframes tpulse {
+  0%   { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.35); opacity: 0; }
+}
+
+/* ── ALERT ── */
+.info-alert {
+  border: 1px solid var(--border); border-left: 4px solid var(--blue);
+  background: #fff; padding: 18px 22px;
+  display: flex; align-items: center; gap: 12px;
+  font-size: .88rem; color: var(--gray);
+}
+.info-alert i { color: var(--blue); flex-shrink: 0; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1023px) {
+  .spec-grid { grid-template-columns: 1fr; }
+  .spec-cell { border-right: none; border-bottom: 1px solid var(--border); }
+  .spec-cell:last-child { border-bottom: none; }
+  .exec-grid { grid-template-columns: 1fr; }
+  .exec-cell { border-right: none; border-bottom: 1px solid var(--border); }
+  .exec-cell:last-child { border-bottom: none; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-cell:nth-child(2) { border-right: none; }
+  .stat-cell:nth-child(3) { border-top: 1px solid rgba(255,255,255,.1); }
+  .mv-grid { grid-template-columns: 1fr; }
+  .mv-cell { border-right: none; border-bottom: 1px solid var(--border); padding: 28px 0; }
+  .mv-cell:first-child { padding-top: 28px; }
+  .mv-cell:last-child { border-bottom: none; padding-left: 0; }
+}
+@media (max-width: 767px) {
+  .section { padding: 60px 0; }
+  .about-panel, .history-panel, .tech-panel { padding: 32px 24px; }
+  .tech-grid { grid-template-columns: 1fr; }
+  .tech-item { border-right: 1px solid var(--border); }
+  .tech-visual { padding-left: 0; margin-top: 36px; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-cell { border-right: none; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .stat-cell:last-child { border-bottom: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ━━━━━━━━━━ PAGE HERO ━━━━━━━━━━ -->
+<div class="page-hero">
+  <div class="container hero-inner">
+    <span class="hero-eyebrow">Who We Are</span>
+    <h1 class="hero-title">Consignment <span>Excellence</span></h1>
+    <p class="hero-sub">Pioneering intelligent logistics solutions since 2008 — built on precision, technology, and global reach.</p>
+  </div>
+  <div class="bc">
+    <div class="container">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li class="cur">About Us</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+
+<!-- ━━━━━━━━━━ ABOUT CONTENT ━━━━━━━━━━ -->
+{% if about_page %}
+<section class="section section-white">
+  <div class="container">
+    <div class="about-panel" data-aos="fade-up">
+      <h2 class="about-title">{{ about_page.title }}</h2>
+      <div class="about-body">{{ about_page.content }}</div>
+
+      <div class="mv-grid">
+        <div class="mv-cell">
+          <div class="mv-icon"><i class="fas fa-bullseye"></i></div>
+          <span class="mv-label">Mission</span>
+          <h3 class="mv-title">Our Mission</h3>
+          <p class="mv-text">{{ about_page.mission }}</p>
+        </div>
+        <div class="mv-cell">
+          <div class="mv-icon"><i class="fas fa-eye"></i></div>
+          <span class="mv-label">Vision</span>
+          <h3 class="mv-title">Our Vision</h3>
+          <p class="mv-text">{{ about_page.vision }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ HISTORY ━━━━━━━━━━ -->
+<section class="section section-navy">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-8" data-aos="fade-right">
+        <div class="history-panel">
+          <div class="history-panel-inner">
+            <span class="sec-eye inv" style="margin-bottom:20px; display:inline-flex;">Our Journey</span>
+            <h2 class="sec-title inv" style="text-align:left; margin-bottom:18px;">
+              Consignment <span>Innovation</span>
+            </h2>
+            <p style="font-size:.92rem; color:rgba(255,255,255,.55); line-height:1.85; font-weight:300;">
+              {{ about_page.history }}
+            </p>
+            <div class="history-meta">
+              <div class="history-meta-item">
+                <i class="fas fa-calendar-alt"></i>
+                Founded in 2008
+              </div>
+              <div class="history-meta-item">
+                <i class="fas fa-sync-alt"></i>
+                Last updated: {{ about_page.last_updated|date:"F d, Y" }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-4 text-center mt-4 mt-lg-0" data-aos="fade-left">
+        <i class="fas fa-road" style="font-size:6rem; color:rgba(19,70,160,.5);"></i>
+        <p style="font-family:'Syne',sans-serif; font-size:.65rem; letter-spacing:.2em; text-transform:uppercase; color:rgba(255,255,255,.25); margin-top:16px;">Driving Global Logistics</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% else %}
+<section class="section section-white">
+  <div class="container">
+    <div class="info-alert" data-aos="fade-up">
+      <i class="fas fa-info-circle"></i>
+      About page content is being prepared. Please check back later.
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ━━━━━━━━━━ SPECIALIZATIONS ━━━━━━━━━━ -->
+<section class="section section-steel">
+  <div class="container">
+    <div class="sec-head" data-aos="fade-up">
+      <span class="sec-eye">What We Do Best</span>
+      <h2 class="sec-title">Consignment <span>Specializations</span></h2>
+      <p class="sec-sub">Advanced solutions for complex logistics challenges</p>
+    </div>
+
+    <div class="spec-grid" data-aos="fade-up" data-aos-delay="80">
+
+      <div class="spec-cell">
+        <div class="spec-icon"><i class="fas fa-temperature-low"></i></div>
+        <h3 class="spec-name">Temperature-Sensitive Logistics</h3>
+        <p class="spec-desc">GDP-compliant cold chain management with real-time temperature monitoring and validation protocols for pharmaceutical and perishable goods.</p>
+      </div>
+
+      <div class="spec-cell">
+        <div class="spec-icon"><i class="fas fa-shield-alt"></i></div>
+        <h3 class="spec-name">High-Value Consignments</h3>
+        <p class="spec-desc">Secure transport solutions for luxury goods, electronics, and sensitive equipment with armed escort options and advanced tracking systems.</p>
+      </div>
+
+      <div class="spec-cell">
+        <div class="spec-icon"><i class="fas fa-warehouse"></i></div>
+        <h3 class="spec-name">Warehousing &amp; Distribution</h3>
+        <p class="spec-desc">Smart warehousing with inventory management, cross-docking, and just-in-time distribution services across global network locations.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ LEADERSHIP ━━━━━━━━━━ -->
+{% if executives %}
+<section class="section section-white">
+  <div class="container">
+    <div class="sec-head" data-aos="fade-up">
+      <span class="sec-eye">The People Behind It</span>
+      <h2 class="sec-title">Our <span>Leadership Team</span></h2>
+      <p class="sec-sub">Experienced professionals driving logistics innovation</p>
+    </div>
+
+    <div class="exec-grid" data-aos="fade-up" data-aos-delay="80">
+      {% for executive in executives %}
+      <div class="exec-cell">
+        <div class="exec-photo-wrap">
+          {% if executive.photo %}
+            <img src="{{ executive.photo.url }}" class="exec-photo" alt="{{ executive.full_name }}">
+          {% else %}
+            <div class="exec-photo-placeholder">
+              <i class="fas fa-user-circle"></i>
+            </div>
+          {% endif %}
+        </div>
+        <div class="exec-info">
+          <h4 class="exec-name">{{ executive.full_name }}</h4>
+          <span class="exec-role">{{ executive.position }}</span>
+          <p class="exec-bio">{{ executive.bio|truncatewords:30 }}</p>
+          <a href="#" class="btn-exec">View Profile <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+
+<!-- ━━━━━━━━━━ STATS ━━━━━━━━━━ -->
+<section class="section section-navy">
+  <div class="container">
+    <div class="sec-head" data-aos="fade-up">
+      <span class="sec-eye inv">By The Numbers</span>
+      <h2 class="sec-title inv">Excellence <span>in Numbers</span></h2>
+      <p class="sec-sub inv">Real metrics reflecting our commitment to performance</p>
+    </div>
+
+    <div class="stats-grid" data-aos="fade-up" data-aos-delay="80">
+      <div class="stat-cell">
+        <span class="stat-num">15<em>+</em></span>
+        <p class="stat-label">Years in Logistics</p>
+        <p class="stat-note">Industry expertise since 2008</p>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num">99.8<em>%</em></span>
+        <p class="stat-label">Delivery Accuracy</p>
+        <p class="stat-note">On-time consignment delivery</p>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num">150<em>+</em></span>
+        <p class="stat-label">Global Partners</p>
+        <p class="stat-note">Network across countries</p>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num">50K<em>+</em></span>
+        <p class="stat-label">Monthly Shipments</p>
+        <p class="stat-note">Active consignments managed</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ TECHNOLOGY ━━━━━━━━━━ -->
+<section class="section section-light">
+  <div class="container">
+    <div class="row align-items-center">
+
+      <div class="col-lg-8" data-aos="fade-right">
+        <div class="tech-panel">
+          <span class="sec-eye" style="margin-bottom:16px; display:inline-flex;">Innovation</span>
+          <h2 class="sec-title" style="text-align:left; margin-bottom:10px;">
+            Technology-Driven <span>Solutions</span>
+          </h2>
+          <p style="font-size:.88rem; color:var(--gray); line-height:1.8; margin-bottom:0;">
+            We leverage advanced technology to provide transparent, efficient, and secure logistics services.
+          </p>
+
+          <div class="tech-grid">
+            <div class="tech-item">
+              <div class="tech-icon"><i class="fas fa-satellite-dish"></i></div>
+              <div>
+                <p class="tech-name">Real-Time GPS Tracking</p>
+                <p class="tech-desc">Live consignment monitoring with predictive ETA</p>
+              </div>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon"><i class="fas fa-robot"></i></div>
+              <div>
+                <p class="tech-name">AI-Powered Routing</p>
+                <p class="tech-desc">Intelligent route optimization for faster delivery</p>
+              </div>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+              <div>
+                <p class="tech-name">Digital Documentation</p>
+                <p class="tech-desc">Paperless processing with e-signature capabilities</p>
+              </div>
+            </div>
+            <div class="tech-item">
+              <div class="tech-icon"><i class="fas fa-chart-bar"></i></div>
+              <div>
+                <p class="tech-name">Advanced Analytics</p>
+                <p class="tech-desc">Data-driven insights for supply chain optimization</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-4 text-center mt-4 mt-lg-0" data-aos="fade-left">
+        <div class="tech-visual">
+          <div class="tech-ring-wrap">
+            <i class="fas fa-microchip"></i>
+            <div class="t-ring"></div>
+            <div class="t-ring d1"></div>
+            <div class="t-ring d2"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Intersection observer for scroll-reveal
+  const observerOptions = { threshold: 0.1, rootMargin: '0px 0px -50px 0px' };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        if (entry.target.classList.contains('animate__animated')) return;
+        entry.target.classList.add('animate__animated', 'animate__fadeInUp');
+        if (entry.target.classList.contains('exec-cell')) {
+          entry.target.style.animationDelay = (Math.random() * 0.4) + 's';
+        }
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('.about-panel, .history-panel, .spec-cell, .exec-cell, .tech-panel, .stat-cell').forEach(el => {
+    observer.observe(el);
+  });
+
+  // Stats counter animation
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.stat-num').forEach(stat => {
+          stat.style.transition = 'transform .6s ease, opacity .6s ease';
+          stat.style.opacity = '1';
+        });
+      }
+    });
+  }, { threshold: 0.5 });
+
+  const statsGrid = document.querySelector('.stats-grid');
+  if (statsGrid) statsObserver.observe(statsGrid);
+});
+</script>
+{% endblock %}

@@ -1,0 +1,33 @@
+<footer class="footer">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <h5>{% if site_settings %}{{ site_settings.company_name }}{% else %}Logistics Inc.{% endif %}</h5>
+                <p>{% if site_settings %}{{ site_settings.footer_text }}{% else %}© 2024 Logistics Inc. All rights reserved.{% endif %}</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Contact Info</h5>
+                <p><i class="fas fa-phone"></i> {% if site_settings %}{{ site_settings.phone_number }}{% else %}+1 (555) 123-4567{% endif %}</p>
+                <p><i class="fas fa-envelope"></i> {% if site_settings %}{{ site_settings.email }}{% else %}info@logistics.com{% endif %}</p>
+                <p><i class="fas fa-map-marker-alt"></i> {% if site_settings %}{{ site_settings.address }}{% else %}123 Logistics St, City, Country{% endif %}</p>
+            </div>
+            <div class="col-md-4">
+                <h5>Follow Us</h5>
+                <div class="social-links">
+                    {% if site_settings and site_settings.facebook_url %}
+                    <a href="{{ site_settings.facebook_url }}" class="text-white me-3"><i class="fab fa-facebook fa-2x"></i></a>
+                    {% endif %}
+                    {% if site_settings and site_settings.twitter_url %}
+                    <a href="{{ site_settings.twitter_url }}" class="text-white me-3"><i class="fab fa-twitter fa-2x"></i></a>
+                    {% endif %}
+                    {% if site_settings and site_settings.linkedin_url %}
+                    <a href="{{ site_settings.linkedin_url }}" class="text-white me-3"><i class="fab fa-linkedin fa-2x"></i></a>
+                    {% endif %}
+                    {% if site_settings and site_settings.instagram_url %}
+                    <a href="{{ site_settings.instagram_url }}" class="text-white"><i class="fab fa-instagram fa-2x"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

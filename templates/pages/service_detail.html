@@ -1,0 +1,372 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ service.title }} - {% if site_settings %}{{ site_settings.company_name }}{% else %}Logistics Company{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0A1628;
+  --blue:    #1346A0;
+  --blue-lt: #1E5FBF;
+  --accent:  #F97316;
+  --steel:   #E8EDF5;
+  --gray:    #64748B;
+  --border:  #D1D9E8;
+  --warm:    #F8FAFC;
+  --fs: 'Syne', sans-serif;
+  --fb: 'Inter', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--fb); background: var(--warm); color: var(--navy); font-weight: 300; -webkit-font-smoothing: antialiased; }
+
+/* ── HERO ── */
+.page-hero { background: var(--navy); position: relative; overflow: hidden; padding: 88px 0 80px; }
+.page-hero::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px); background-size: 60px 60px; pointer-events: none; }
+.page-hero::after { content: ''; position: absolute; top: -200px; right: -200px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(19,70,160,.4) 0%, transparent 70%); pointer-events: none; }
+.hero-inner { position: relative; z-index: 2; }
+.hero-back { display: inline-flex; align-items: center; gap: 8px; color: rgba(255,255,255,.45); text-decoration: none; font-family: var(--fs); font-size: .65rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; margin-bottom: 28px; transition: color .2s; }
+.hero-back:hover { color: var(--accent); }
+.hero-back i { font-size: .75rem; }
+.hero-service-icon { width: 72px; height: 72px; background: rgba(249,115,22,.15); border: 1px solid rgba(249,115,22,.3); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: var(--accent); margin-bottom: 24px; }
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: var(--fs); font-size: .62rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+.hero-eyebrow::before { content: ''; width: 20px; height: 2px; background: var(--accent); display: block; }
+.hero-title { font-family: var(--fs); font-size: clamp(2rem, 4vw, 3.2rem); font-weight: 800; color: #fff; line-height: 1.08; letter-spacing: -.02em; margin-bottom: 16px; }
+.hero-sub { font-size: .92rem; color: rgba(255,255,255,.5); font-weight: 300; max-width: 560px; line-height: 1.8; }
+
+.bc { background: rgba(255,255,255,.04); border-top: 1px solid rgba(255,255,255,.06); padding: 11px 0; }
+.bc ol { list-style: none; display: flex; gap: 8px; flex-wrap: wrap; }
+.bc li { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); display: flex; align-items: center; gap: 8px; }
+.bc li::before { content: '/'; color: rgba(255,255,255,.15); }
+.bc li:first-child::before { display: none; }
+.bc a { color: rgba(255,255,255,.5); text-decoration: none; }
+.bc a:hover { color: var(--accent); }
+.bc li.cur { color: var(--accent); }
+
+/* ── LAYOUT ── */
+.section { padding: 80px 0; }
+.section-white { background: #fff; }
+.section-steel { background: var(--steel); }
+.section-navy  { background: var(--navy); }
+.section-light { background: var(--warm); }
+
+/* ── DESCRIPTION PANEL ── */
+.desc-panel { border: 1px solid var(--border); background: #fff; padding: 52px 48px; }
+.panel-rule { width: 36px; height: 3px; background: var(--accent); margin-bottom: 28px; }
+.panel-title { font-family: var(--fs); font-size: 1.5rem; font-weight: 800; color: var(--navy); margin-bottom: 20px; }
+.panel-body { font-size: .92rem; color: var(--gray); line-height: 1.9; font-weight: 300; }
+.panel-body p { margin-bottom: 1.2em; }
+.panel-body p:last-child { margin-bottom: 0; }
+
+/* ── FEATURES LIST (left sidebar) ── */
+.features-panel { border: 1px solid var(--border); background: var(--steel); }
+.fp-header { padding: 18px 24px; border-bottom: 1px solid var(--border); background: var(--navy); }
+.fp-header-text { font-family: var(--fs); font-size: .68rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase; color: rgba(255,255,255,.7); }
+.feat-item { display: flex; align-items: flex-start; gap: 14px; padding: 16px 24px; border-bottom: 1px solid var(--border); transition: background .2s; }
+.feat-item:last-child { border-bottom: none; }
+.feat-item:hover { background: #fff; }
+.feat-dot { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.feat-text { font-size: .84rem; color: var(--navy); line-height: 1.6; }
+
+/* ── BENEFITS (2-col bordered grid) ── */
+.benefits-grid { display: grid; grid-template-columns: repeat(2, 1fr); border: 1px solid var(--border); }
+.benefit-cell { padding: 36px 32px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transition: background .25s; }
+.benefit-cell:nth-child(2n) { border-right: none; }
+.benefit-cell:nth-last-child(-n+2) { border-bottom: none; }
+.benefit-cell:last-child { border-bottom: none; border-right: none; }
+.benefit-cell:hover { background: var(--steel); }
+.benefit-icon { width: 46px; height: 46px; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--accent); margin-bottom: 18px; transition: all .3s; }
+.benefit-cell:hover .benefit-icon { background: var(--blue); }
+.benefit-name { font-family: var(--fs); font-size: .95rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.benefit-desc { font-size: .82rem; color: var(--gray); line-height: 1.7; }
+
+/* ── STATS (4-col bordered, dark) ── */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid rgba(255,255,255,.1); }
+.stat-cell { padding: 44px 28px; border-right: 1px solid rgba(255,255,255,.1); text-align: center; }
+.stat-cell:last-child { border-right: none; }
+.stat-num { font-family: var(--fs); font-size: 2.8rem; font-weight: 800; color: #fff; display: block; line-height: 1; margin-bottom: 8px; }
+.stat-num em { font-style: normal; color: var(--accent); }
+.stat-label { font-family: var(--fs); font-size: .78rem; font-weight: 600; color: rgba(255,255,255,.65); margin-bottom: 5px; }
+.stat-note { font-size: .7rem; color: rgba(255,255,255,.3); }
+
+/* ── PROCESS STEPS (horizontal 4-col) ── */
+.steps-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--border); }
+.step-cell { padding: 36px 28px; border-right: 1px solid var(--border); transition: background .25s; }
+.step-cell:last-child { border-right: none; }
+.step-cell:hover { background: var(--steel); }
+.step-num { font-family: var(--fs); font-size: 2.5rem; font-weight: 800; color: rgba(19,70,160,.12); line-height: 1; margin-bottom: 16px; }
+.step-icon { width: 42px; height: 42px; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: .9rem; color: var(--accent); margin-bottom: 14px; transition: all .3s; }
+.step-cell:hover .step-icon { background: var(--blue); }
+.step-name { font-family: var(--fs); font-size: .9rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.step-desc { font-size: .78rem; color: var(--gray); line-height: 1.7; }
+
+/* ── CONTACT / CTA ── */
+.cta-panel { background: var(--blue); padding: 56px 48px; position: relative; overflow: hidden; }
+.cta-panel::after { content: ''; position: absolute; bottom: -100px; right: -100px; width: 350px; height: 350px; background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 70%); pointer-events: none; }
+.cta-inner { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+.cta-title { font-family: var(--fs); font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: #fff; margin-bottom: 10px; line-height: 1.1; }
+.cta-sub { font-size: .88rem; color: rgba(255,255,255,.55); font-weight: 300; max-width: 460px; line-height: 1.75; }
+.btn-cta { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: var(--blue); border: 2px solid #fff; padding: 15px 36px; font-family: var(--fs); font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; text-decoration: none; transition: all .25s; white-space: nowrap; flex-shrink: 0; }
+.btn-cta:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* ── OTHER SERVICES ── */
+.other-grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); }
+.other-cell { padding: 32px 28px; border-right: 1px solid var(--border); transition: background .25s; display: flex; align-items: flex-start; gap: 16px; text-decoration: none; }
+.other-cell:last-child { border-right: none; }
+.other-cell:hover { background: var(--steel); }
+.other-icon { width: 42px; height: 42px; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: .95rem; color: var(--accent); flex-shrink: 0; transition: all .3s; }
+.other-cell:hover .other-icon { background: var(--blue); }
+.other-name { font-family: var(--fs); font-size: .88rem; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+.other-desc { font-size: .76rem; color: var(--gray); line-height: 1.6; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1023px) {
+  .benefits-grid { grid-template-columns: 1fr; }
+  .benefit-cell { border-right: none; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .stat-cell:nth-child(2) { border-right: none; }
+  .stat-cell:nth-child(3) { border-top: 1px solid rgba(255,255,255,.1); }
+  .steps-grid { grid-template-columns: repeat(2, 1fr); }
+  .step-cell:nth-child(2n) { border-right: none; }
+  .step-cell:nth-child(3) { border-top: 1px solid var(--border); }
+  .other-grid { grid-template-columns: 1fr; }
+  .other-cell { border-right: none; border-bottom: 1px solid var(--border); }
+  .other-cell:last-child { border-bottom: none; }
+}
+@media (max-width: 767px) {
+  .section { padding: 56px 0; }
+  .page-hero { padding: 60px 0 52px; }
+  .desc-panel { padding: 32px 20px; }
+  .cta-panel { padding: 36px 24px; }
+  .cta-inner { flex-direction: column; align-items: flex-start; }
+  .stats-grid { grid-template-columns: 1fr; }
+  .stat-cell { border-right: none; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .stat-cell:last-child { border-bottom: none; }
+  .steps-grid { grid-template-columns: 1fr; }
+  .step-cell { border-right: none; border-bottom: 1px solid var(--border); }
+  .step-cell:last-child { border-bottom: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ━━━━━━━━━━ HERO ━━━━━━━━━━ -->
+<div class="page-hero">
+  <div class="container hero-inner">
+    <a href="{% url 'services' %}" class="hero-back"><i class="fas fa-arrow-left"></i> Back to Services</a>
+    <div class="hero-service-icon"><i class="{{ service.icon_class }}"></i></div>
+    <span class="hero-eyebrow">Our Service</span>
+    <h1 class="hero-title">{{ service.title }}</h1>
+    <p class="hero-sub">{{ service.short_description|default:service.description|truncatewords:25 }}</p>
+  </div>
+  <div class="bc">
+    <div class="container">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li><a href="{% url 'services' %}">Services</a></li>
+        <li class="cur">{{ service.title }}</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+
+<!-- ━━━━━━━━━━ DESCRIPTION + FEATURES ━━━━━━━━━━ -->
+<section class="section section-white">
+  <div class="container">
+    <div class="row g-4">
+
+      <!-- Description -->
+      <div class="col-lg-8">
+        <div class="desc-panel">
+          <div class="panel-rule"></div>
+          <h2 class="panel-title">Service Overview</h2>
+          <div class="panel-body">
+            {{ service.description|linebreaks }}
+          </div>
+        </div>
+      </div>
+
+      <!-- Features sidebar -->
+      <div class="col-lg-4">
+        <div class="features-panel">
+          <div class="fp-header">
+            <p class="fp-header-text"><i class="fas fa-check-circle me-2" style="color:var(--accent);"></i>What's Included</p>
+          </div>
+          {% for feature in service.features.all %}
+          <div class="feat-item">
+            <div class="feat-dot"></div>
+            <p class="feat-text">{{ feature.title }}</p>
+          </div>
+          {% empty %}
+          <div class="feat-item"><div class="feat-dot"></div><p class="feat-text">Real-time shipment tracking</p></div>
+          <div class="feat-item"><div class="feat-dot"></div><p class="feat-text">Dedicated account manager</p></div>
+          <div class="feat-item"><div class="feat-dot"></div><p class="feat-text">24/7 customer support</p></div>
+          <div class="feat-item"><div class="feat-dot"></div><p class="feat-text">Automated status notifications</p></div>
+          <div class="feat-item"><div class="feat-dot"></div><p class="feat-text">Customised reporting dashboard</p></div>
+          <div class="feat-item"><div class="feat-dot"></div><p class="feat-text">Insurance &amp; compliance support</p></div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ KEY BENEFITS ━━━━━━━━━━ -->
+<section class="section section-steel">
+  <div class="container">
+    <div class="sec-head" style="text-align:center; margin-bottom:48px;">
+      <span class="sec-eye" style="display:inline-flex; align-items:center; gap:8px; font-family:var(--fs); font-size:.65rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--blue); margin-bottom:14px;">
+        <span style="width:20px; height:2px; background:var(--blue); display:block;"></span>Why Choose This Service
+      </span>
+      <h2 style="font-family:var(--fs); font-size:clamp(1.8rem,3vw,2.4rem); font-weight:800; color:var(--navy); margin-bottom:12px;">Key <span style="color:var(--blue);">Benefits</span></h2>
+      <p style="font-size:.88rem; color:var(--gray); font-weight:300; line-height:1.8;">Advantages that set our {{ service.title }} apart from the competition</p>
+    </div>
+
+    <div class="benefits-grid">
+      <div class="benefit-cell">
+        <div class="benefit-icon"><i class="fas fa-clock"></i></div>
+        <h3 class="benefit-name">Speed &amp; Reliability</h3>
+        <p class="benefit-desc">Industry-leading transit times with 99.7% on-time delivery rates backed by our global logistics network and real-time optimisation systems.</p>
+      </div>
+      <div class="benefit-cell">
+        <div class="benefit-icon"><i class="fas fa-shield-alt"></i></div>
+        <h3 class="benefit-name">End-to-End Security</h3>
+        <p class="benefit-desc">Comprehensive cargo protection with tamper-evident sealing, GPS monitoring, and full insurance coverage for complete peace of mind.</p>
+      </div>
+      <div class="benefit-cell">
+        <div class="benefit-icon"><i class="fas fa-chart-line"></i></div>
+        <h3 class="benefit-name">Cost Efficiency</h3>
+        <p class="benefit-desc">AI-driven route optimisation and consolidated shipping options reduce costs by up to 35% compared to traditional logistics providers.</p>
+      </div>
+      <div class="benefit-cell">
+        <div class="benefit-icon"><i class="fas fa-headset"></i></div>
+        <h3 class="benefit-name">Dedicated Support</h3>
+        <p class="benefit-desc">A named account manager and 24/7 expert support team ensure you always have access to the help you need, whenever you need it.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ PERFORMANCE STATS (dark) ━━━━━━━━━━ -->
+<section class="section section-navy">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat-cell">
+        <span class="stat-num">99.7<em>%</em></span>
+        <p class="stat-label">On-time Delivery</p>
+        <p class="stat-note">Across all routes</p>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num">150<em>+</em></span>
+        <p class="stat-label">Countries Covered</p>
+        <p class="stat-note">Global network reach</p>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num">35<em>%</em></span>
+        <p class="stat-label">Average Cost Saving</p>
+        <p class="stat-note">vs. standard providers</p>
+      </div>
+      <div class="stat-cell">
+        <span class="stat-num">24<em>/7</em></span>
+        <p class="stat-label">Support Coverage</p>
+        <p class="stat-note">Always available</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ HOW IT WORKS ━━━━━━━━━━ -->
+<section class="section section-white">
+  <div class="container">
+    <div style="text-align:center; margin-bottom:48px;">
+      <span style="display:inline-flex; align-items:center; gap:8px; font-family:var(--fs); font-size:.65rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--blue); margin-bottom:14px;">
+        <span style="width:20px; height:2px; background:var(--blue); display:block;"></span>The Process
+      </span>
+      <h2 style="font-family:var(--fs); font-size:clamp(1.8rem,3vw,2.4rem); font-weight:800; color:var(--navy);">How It <span style="color:var(--blue);">Works</span></h2>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-cell">
+        <div class="step-num">01</div>
+        <div class="step-icon"><i class="fas fa-clipboard-list"></i></div>
+        <h3 class="step-name">Submit Request</h3>
+        <p class="step-desc">Use our online portal or contact your account manager to submit your shipment details and service requirements.</p>
+      </div>
+      <div class="step-cell">
+        <div class="step-num">02</div>
+        <div class="step-icon"><i class="fas fa-file-alt"></i></div>
+        <h3 class="step-name">Documentation</h3>
+        <p class="step-desc">Our team handles all documentation, customs paperwork, and compliance checks automatically using our smart systems.</p>
+      </div>
+      <div class="step-cell">
+        <div class="step-num">03</div>
+        <div class="step-icon"><i class="fas fa-truck"></i></div>
+        <h3 class="step-name">Collection &amp; Transit</h3>
+        <p class="step-desc">Your cargo is collected, processed, and routed via our optimised network with real-time GPS tracking throughout.</p>
+      </div>
+      <div class="step-cell">
+        <div class="step-num">04</div>
+        <div class="step-icon"><i class="fas fa-check-circle"></i></div>
+        <h3 class="step-name">Delivery &amp; Confirm</h3>
+        <p class="step-desc">Final delivery with digital proof of receipt, automated invoicing, and a performance report delivered to your dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ CTA ━━━━━━━━━━ -->
+<div class="cta-panel">
+  <div class="cta-inner">
+    <div>
+      <h2 class="cta-title">Get Started with {{ service.title }}</h2>
+      <p class="cta-sub">Ready to optimise your logistics? Our team will design a solution tailored to your specific requirements and budget.</p>
+    </div>
+    <a href="{% url 'contact' %}" class="btn-cta"><i class="fas fa-envelope"></i>Contact Us</a>
+  </div>
+</div>
+
+
+<!-- ━━━━━━━━━━ OTHER SERVICES ━━━━━━━━━━ -->
+<section class="section section-steel">
+  <div class="container">
+    <div style="text-align:center; margin-bottom:40px;">
+      <span style="display:inline-flex; align-items:center; gap:8px; font-family:var(--fs); font-size:.65rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--blue); margin-bottom:14px;">
+        <span style="width:20px; height:2px; background:var(--blue); display:block;"></span>Explore More
+      </span>
+      <h2 style="font-family:var(--fs); font-size:clamp(1.6rem,3vw,2.2rem); font-weight:800; color:var(--navy);">Other <span style="color:var(--blue);">Services</span></h2>
+    </div>
+
+    <div class="other-grid">
+      <a href="{% url 'services' %}" class="other-cell">
+        <div class="other-icon"><i class="fas fa-shipping-fast"></i></div>
+        <div>
+          <p class="other-name">Express Delivery</p>
+          <p class="other-desc">Same-day and next-day delivery with real-time tracking</p>
+        </div>
+      </a>
+      <a href="{% url 'services' %}" class="other-cell">
+        <div class="other-icon"><i class="fas fa-warehouse"></i></div>
+        <div>
+          <p class="other-name">Smart Warehousing</p>
+          <p class="other-desc">IoT-enabled storage with automated inventory management</p>
+        </div>
+      </a>
+      <a href="{% url 'services' %}" class="other-cell">
+        <div class="other-icon"><i class="fas fa-globe-americas"></i></div>
+        <div>
+          <p class="other-name">Global Trade</p>
+          <p class="other-desc">End-to-end international logistics and customs clearance</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

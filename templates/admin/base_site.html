@@ -1,0 +1,46 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Logistics Admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <i class="fas fa-truck-loading"></i>
+        {{ site_header|default:_('Logistics Administration') }}
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<style>
+    #header {
+        background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+        color: white;
+    }
+    
+    #branding h1 {
+        color: white;
+        font-weight: 600;
+    }
+    
+    .module caption {
+        background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+        color: white;
+    }
+    
+    .submit-row input {
+        background: linear-gradient(135deg, #0d6efd 0%, #6f42c1 100%);
+        border: none;
+    }
+    
+    .dashboard .module table td a {
+        color: #0d6efd;
+        font-weight: 500;
+    }
+    
+    .dashboard .module table th {
+        background: #f8f9fa;
+        color: #495057;
+    }
+</style>
+{% endblock %}

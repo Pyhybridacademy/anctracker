@@ -1,0 +1,489 @@
+{% extends 'base.html' %}
+
+{% block title %}Track Shipment - {% if site_settings %}{{ site_settings.company_name }}{% else %}Logistics Company{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:    #0A1628;
+  --blue:    #1346A0;
+  --blue-lt: #1E5FBF;
+  --accent:  #F97316;
+  --steel:   #E8EDF5;
+  --gray:    #64748B;
+  --border:  #D1D9E8;
+  --warm:    #F8FAFC;
+  --fs: 'Syne', sans-serif;
+  --fb: 'Inter', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--fb); background: var(--warm); color: var(--navy); font-weight: 300; -webkit-font-smoothing: antialiased; }
+
+/* ── PAGE HERO ── */
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  padding: 88px 0 80px;
+  background-image: url('/static/images/carousel-1.png');
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.page-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(rgba(10,22,40,0.75), rgba(10,22,40,0.8));
+  pointer-events: none;
+  z-index: 1;
+}
+.page-hero::after {
+  content: '';
+  position: absolute; top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(19,70,160,.25) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+}
+.hero-inner { position: relative; z-index: 2; text-align: center; }
+.hero-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: var(--fs); font-size: .65rem; font-weight: 600;
+  letter-spacing: .22em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px;
+}
+.hero-eyebrow::before,
+.hero-eyebrow::after { content: ''; width: 28px; height: 2px; background: var(--accent); display: block; }
+.hero-title {
+  font-family: var(--fs); font-size: clamp(2.2rem, 5vw, 3.8rem);
+  font-weight: 800; color: #fff; line-height: 1.06; letter-spacing: -.02em; margin-bottom: 16px;
+}
+.hero-title span { color: var(--accent); }
+.hero-sub {
+  font-size: .95rem; color: rgba(255,255,255,.85); font-weight: 300;
+  max-width: 500px; margin: 0 auto; line-height: 1.8;
+}
+
+/* breadcrumb */
+.bc { background: rgba(0,0,0,.6); border-top: 1px solid rgba(255,255,255,.1); padding: 11px 0; position: relative; z-index: 2; }
+.bc ol { list-style: none; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.bc li { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.5); display: flex; align-items: center; gap: 8px; }
+.bc li::before { content: '/'; color: rgba(255,255,255,.2); }
+.bc li:first-child::before { display: none; }
+.bc a { color: rgba(255,255,255,.6); text-decoration: none; transition: color .2s; }
+.bc a:hover { color: var(--accent); }
+.bc li.cur { color: var(--accent); }
+
+/* ── SECTIONS ── */
+.section { padding: 80px 0; }
+.section-white { background: #fff; }
+.section-steel { background: var(--steel); }
+.section-navy  { background: var(--navy); }
+.section-light { background: var(--warm); }
+
+.sec-head { text-align: center; margin-bottom: 52px; }
+.sec-eye {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--fs); font-size: .65rem; font-weight: 700;
+  letter-spacing: .2em; text-transform: uppercase; color: var(--blue); margin-bottom: 14px;
+}
+.sec-eye::before { content: ''; width: 20px; height: 2px; background: var(--blue); display: block; }
+.sec-eye.inv { color: var(--accent); }
+.sec-eye.inv::before { background: var(--accent); }
+.sec-title { font-family: var(--fs); font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 800; line-height: 1.1; color: var(--navy); margin-bottom: 14px; }
+.sec-title span { color: var(--blue); }
+.sec-title.inv { color: #fff; }
+.sec-sub { font-size: .92rem; color: var(--gray); font-weight: 300; line-height: 1.8; max-width: 480px; margin: 0 auto; }
+
+/* ── TRACKING FORM WITH IMAGE SIDE BY SIDE ── */
+.track-panel-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.track-panel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  background: #fff;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.track-panel-image {
+  position: relative;
+  overflow: hidden;
+  min-height: 100%;
+}
+.track-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.track-panel {
+  background: #fff;
+  padding: 52px 48px;
+}
+.track-panel-title {
+  font-family: var(--fs);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 6px;
+}
+.track-panel-sub {
+  font-size: .85rem;
+  color: var(--gray);
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+.track-rule {
+  width: 36px;
+  height: 2px;
+  background: var(--accent);
+  margin-bottom: 28px;
+}
+.flabel {
+  font-family: var(--fs); font-size: .62rem; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase; color: var(--gray);
+  display: block; margin-bottom: 8px;
+}
+.finput-row { display: flex; border: 1px solid var(--border); }
+.finput {
+  flex: 1; border: none; outline: none; padding: 14px 18px;
+  font-family: var(--fb); font-size: .95rem; color: var(--navy);
+  background: #fff; font-weight: 400;
+}
+.finput::placeholder { color: #bbc; }
+.finput:focus { background: var(--warm); }
+.btn-track {
+  background: var(--blue); color: #fff; border: none;
+  padding: 0 32px; font-family: var(--fs); font-size: .72rem; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase; cursor: pointer;
+  white-space: nowrap; display: flex; align-items: center; gap: 8px;
+  transition: background .25s;
+}
+.btn-track:hover { background: var(--blue-lt); }
+.track-hint {
+  font-size: .75rem; color: var(--gray); margin-top: 10px;
+  display: flex; align-items: center; gap: 6px;
+}
+.track-hint i { color: var(--blue); }
+
+/* ── FIND CODE GRID (4-col bordered) ── */
+.find-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--border);
+}
+.find-cell {
+  padding: 36px 28px; border-right: 1px solid var(--border);
+  transition: background .25s;
+}
+.find-cell:last-child { border-right: none; }
+.find-cell:hover { background: var(--steel); }
+.find-icon {
+  width: 48px; height: 48px; background: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem; color: var(--accent); margin-bottom: 18px; transition: all .3s;
+}
+.find-cell:hover .find-icon { background: var(--blue); }
+.find-num {
+  font-family: var(--fs); font-size: .6rem; font-weight: 700;
+  letter-spacing: .18em; color: rgba(184,150,90,.5); display: block; margin-bottom: 8px;
+}
+.find-name { font-family: var(--fs); font-size: .92rem; font-weight: 700; color: var(--navy); margin-bottom: 8px; }
+.find-desc { font-size: .78rem; color: var(--gray); line-height: 1.7; }
+
+/* ── TIPS PANEL ── */
+.tips-panel {
+  border: 1px solid var(--border); border-left: 4px solid var(--blue);
+  background: #fff; padding: 0;
+}
+.tips-header {
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  font-family: var(--fs); font-size: .72rem; font-weight: 700;
+  letter-spacing: .15em; text-transform: uppercase; color: var(--blue);
+  display: flex; align-items: center; gap: 8px;
+}
+.tip-row {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 16px 24px; border-bottom: 1px solid var(--border);
+  transition: background .2s;
+}
+.tip-row:last-child { border-bottom: none; }
+.tip-row:hover { background: var(--steel); }
+.tip-dot {
+  width: 6px; height: 6px; background: var(--accent);
+  border-radius: 50%; flex-shrink: 0; margin-top: 6px;
+}
+.tip-text { font-size: .83rem; color: var(--gray); line-height: 1.65; }
+.tip-text strong { color: var(--navy); font-weight: 600; }
+
+/* ── FEATURES (6-col into 3-col bordered grid) ── */
+.features-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  border: 1px solid rgba(255,255,255,.1);
+}
+.feat-cell {
+  padding: 40px 32px; border-right: 1px solid rgba(255,255,255,.1);
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  transition: background .25s;
+}
+.feat-cell:nth-child(3n) { border-right: none; }
+.feat-cell:nth-child(n+4) { border-bottom: none; }
+.feat-cell:hover { background: rgba(255,255,255,.04); }
+.feat-icon {
+  width: 46px; height: 46px; background: rgba(249,115,22,.15);
+  border: 1px solid rgba(249,115,22,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; color: var(--accent); margin-bottom: 16px; transition: all .3s;
+}
+.feat-cell:hover .feat-icon { background: var(--accent); color: #fff; border-color: var(--accent); }
+.feat-name { font-family: var(--fs); font-size: .88rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.feat-desc { font-size: .78rem; color: rgba(255,255,255,.38); line-height: 1.7; }
+
+/* ── HELP BANNER ── */
+.help-bar {
+  background: var(--blue); padding: 56px 0;
+}
+.help-inner {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+}
+.help-text h3 {
+  font-family: var(--fs); font-size: 1.8rem; font-weight: 800;
+  color: #fff; margin-bottom: 6px; line-height: 1.15;
+}
+.help-text p { font-size: .88rem; color: rgba(255,255,255,.55); font-weight: 300; margin-bottom: 14px; }
+.help-checks { display: flex; flex-direction: column; gap: 6px; }
+.help-check { font-size: .8rem; color: rgba(255,255,255,.6); display: flex; align-items: center; gap: 8px; }
+.help-check i { color: var(--accent); }
+
+.help-contact {
+  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
+  padding: 28px 32px; flex-shrink: 0;
+}
+.hc-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.1); }
+.hc-item:last-child { border-bottom: none; }
+.hc-item i { color: var(--accent); font-size: .95rem; width: 16px; text-align: center; }
+.hc-val { font-family: var(--fs); font-size: .88rem; font-weight: 700; color: #fff; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 1023px) {
+  .find-grid { grid-template-columns: repeat(2, 1fr); }
+  .find-cell:nth-child(2) { border-right: none; }
+  .find-cell:nth-child(3) { border-top: 1px solid var(--border); }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .feat-cell:nth-child(2n) { border-right: none; }
+  .feat-cell:nth-child(n+5) { border-bottom: none; }
+  .feat-cell:nth-child(3n) { border-right: 1px solid rgba(255,255,255,.1); }
+}
+@media (max-width: 767px) {
+  .section { padding: 56px 0; }
+  .page-hero { padding: 64px 0 56px; min-height: 400px; }
+  .track-panel-grid { grid-template-columns: 1fr; }
+  .track-panel-image { order: 1; max-height: 250px; }
+  .track-panel { order: 2; padding: 32px 20px; }
+  .track-img { height: 100%; max-height: 250px; }
+  .finput-row { flex-direction: column; }
+  .btn-track { padding: 14px; justify-content: center; border-top: 1px solid var(--border); }
+  .find-grid { grid-template-columns: 1fr; }
+  .find-cell { border-right: none; border-bottom: 1px solid var(--border); }
+  .find-cell:last-child { border-bottom: none; }
+  .features-grid { grid-template-columns: 1fr; }
+  .feat-cell { border-right: none !important; }
+  .help-inner { flex-direction: column; align-items: flex-start; }
+  .help-contact { width: 100%; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- ━━━━━━━━━━ HERO ━━━━━━━━━━ -->
+<div class="page-hero">
+  <div class="container hero-inner">
+    <span class="hero-eyebrow">Real-Time Tracking</span>
+    <h1 class="hero-title">Track Your <span>Shipment</span></h1>
+    <p class="hero-sub">Enter your tracking number below to get instant, real-time updates on your package location and delivery status.</p>
+  </div>
+  <div class="bc">
+    <div class="container">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li class="cur">Track Shipment</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+
+<!-- ━━━━━━━━━━ TRACKING FORM ━━━━━━━━━━ -->
+<section class="section section-light">
+  <div class="container">
+    <div class="track-panel-wrapper" data-aos="fade-up">
+      <div class="track-panel-grid">
+        <div class="track-panel-image">
+          <img src="/static/images/gls-con.jpg" alt="Track your shipment" class="track-img">
+        </div>
+        <div class="track-panel">
+          <h2 class="track-panel-title">Track Package Status</h2>
+          <div class="track-rule"></div>
+          <p class="track-panel-sub">Get instant updates on your shipment location and estimated delivery time.</p>
+
+          <form action="{% url 'track_shipment' %}" method="get">
+            <label class="flabel"><i class="fas fa-barcode me-2"></i>Tracking Number</label>
+            <div class="finput-row">
+              <input
+                type="text"
+                class="finput"
+                id="tracking_code"
+                name="tracking_code"
+                placeholder="Enter your tracking code (e.g., TRK1A2B3C4D)"
+                required
+              >
+              <button class="btn-track" type="submit">
+                <i class="fas fa-search"></i> Track Package
+              </button>
+            </div>
+            <p class="track-hint">
+              <i class="fas fa-info-circle"></i>
+              Your tracking code was provided when your shipment was registered.
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ HOW TO FIND (4-col grid) ━━━━━━━━━━ -->
+<section class="section section-white">
+  <div class="container">
+    <div class="sec-head" data-aos="fade-up">
+      <span class="sec-eye">Locating Your Code</span>
+      <h2 class="sec-title">How to Find Your <span>Tracking Number</span></h2>
+      <p class="sec-sub">Your tracking code is available in several places after your shipment is registered.</p>
+    </div>
+
+    <div class="find-grid" data-aos="fade-up" data-aos-delay="80">
+      <div class="find-cell">
+        <div class="find-icon"><i class="fas fa-receipt"></i></div>
+        <span class="find-num">01</span>
+        <h3 class="find-name">Shipping Receipt</h3>
+        <p class="find-desc">Printed on the receipt you received when dropping off your package — usually at the top or bottom.</p>
+      </div>
+      <div class="find-cell">
+        <div class="find-icon"><i class="fas fa-envelope-open-text"></i></div>
+        <span class="find-num">02</span>
+        <h3 class="find-name">Email Confirmation</h3>
+        <p class="find-desc">Check the confirmation email sent after your shipment was registered. Search your inbox for our logistics team.</p>
+      </div>
+      <div class="find-cell">
+        <div class="find-icon"><i class="fas fa-mobile-alt"></i></div>
+        <span class="find-num">03</span>
+        <h3 class="find-name">SMS Notification</h3>
+        <p class="find-desc">If you provided a phone number, you should have received an SMS with your tracking code and confirmation details.</p>
+      </div>
+      <div class="find-cell">
+        <div class="find-icon"><i class="fas fa-user-circle"></i></div>
+        <span class="find-num">04</span>
+        <h3 class="find-name">Customer Account</h3>
+        <p class="find-desc">Log into your account to view all your shipments and their tracking codes in your order history dashboard.</p>
+      </div>
+    </div>
+
+    <!-- Quick Tips -->
+    <div class="tips-panel" style="max-width:760px; margin:40px auto 0;" data-aos="fade-up">
+      <div class="tips-header"><i class="fas fa-lightbulb"></i>Quick Tips for Tracking</div>
+      <div class="tip-row">
+        <div class="tip-dot"></div>
+        <p class="tip-text"><strong>Case Sensitive:</strong> Enter your tracking code exactly as shown, including capitalisation.</p>
+      </div>
+      <div class="tip-row">
+        <div class="tip-dot"></div>
+        <p class="tip-text"><strong>No Spaces:</strong> Remove any spaces between characters in your tracking code.</p>
+      </div>
+      <div class="tip-row">
+        <div class="tip-dot"></div>
+        <p class="tip-text"><strong>Update Frequency:</strong> Tracking information is updated every 2–4 hours during transit.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ FEATURES (dark) ━━━━━━━━━━ -->
+<section class="section section-navy">
+  <div class="container">
+    <div class="sec-head" data-aos="fade-up">
+      <span class="sec-eye inv">Why Track With Us</span>
+      <h2 class="sec-title inv">Tracking <span style="color:var(--accent);">Features</span></h2>
+      <p class="sec-sub" style="color:rgba(255,255,255,.42);">Built-in capabilities that keep you informed every step of the way.</p>
+    </div>
+
+    <div class="features-grid" data-aos="fade-up" data-aos-delay="80">
+      <div class="feat-cell">
+        <div class="feat-icon"><i class="fas fa-clock"></i></div>
+        <h3 class="feat-name">Real-Time Updates</h3>
+        <p class="feat-desc">Instant notifications about your package status with live GPS tracking and automated alerts.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon"><i class="fas fa-shield-alt"></i></div>
+        <h3 class="feat-name">Secure Tracking</h3>
+        <p class="feat-desc">Shipment data protected with enterprise-grade encryption and secure authentication protocols.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon"><i class="fas fa-globe-americas"></i></div>
+        <h3 class="feat-name">Global Coverage</h3>
+        <p class="feat-desc">Track shipments across 150+ countries with our seamless international logistics network.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon"><i class="fas fa-mobile-alt"></i></div>
+        <h3 class="feat-name">Mobile Friendly</h3>
+        <p class="feat-desc">Track your packages from any device — desktop, tablet, or smartphone, anytime.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon"><i class="fas fa-history"></i></div>
+        <h3 class="feat-name">Complete History</h3>
+        <p class="feat-desc">Detailed tracking history with timestamps and location data for every checkpoint.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-icon"><i class="fas fa-bell"></i></div>
+        <h3 class="feat-name">Smart Notifications</h3>
+        <p class="feat-desc">Automated email and SMS alerts for important shipment status changes and updates.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ━━━━━━━━━━ HELP BANNER ━━━━━━━━━━ -->
+<div class="help-bar" data-aos="fade-up">
+  <div class="container">
+    <div class="help-inner">
+      <div class="help-text">
+        <h3>Need Assistance?</h3>
+        <p>Our dedicated customer support team is available 24/7 to assist with tracking inquiries, delivery issues, or any questions about your shipment.</p>
+        <div class="help-checks">
+          <div class="help-check"><i class="fas fa-check-circle"></i> Multi-language support available</div>
+          <div class="help-check"><i class="fas fa-check-circle"></i> Average response time: Under 5 minutes</div>
+        </div>
+      </div>
+      <div class="help-contact">
+        <div class="hc-item">
+          <i class="fas fa-phone-alt"></i>
+          <span class="hc-val">{% if site_settings %}{{ site_settings.phone_number }}{% else %}+1 (555) 123-4567{% endif %}</span>
+        </div>
+        <div class="hc-item">
+          <i class="fas fa-envelope"></i>
+          <span class="hc-val">{% if site_settings %}{{ site_settings.email }}{% else %}support@logistics.com{% endif %}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

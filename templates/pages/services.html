@@ -1,0 +1,395 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Services - {% if site_settings %}{{ site_settings.company_name }}{% else %}Logistics Company{% endif %}{% endblock %}
+
+{% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+:root {
+  --navy:    #0A1628;
+  --blue:    #1346A0;
+  --blue-lt: #1E5FBF;
+  --accent:  #F97316;
+  --steel:   #E8EDF5;
+  --gray:    #64748B;
+  --border:  #D1D9E8;
+  --warm:    #F8FAFC;
+  --fs: 'Syne', sans-serif;
+  --fb: 'Inter', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--fb); background: var(--warm); color: var(--navy); font-weight: 300; -webkit-font-smoothing: antialiased; }
+
+.page-hero { 
+  background: linear-gradient(135deg, rgba(10,22,40,0.85) 0%, rgba(13,31,58,0.9) 100%), url('/static/images/carousel-1.png'); 
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative; 
+  overflow: hidden; 
+  padding: 120px 0 100px; 
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+.page-hero::before { 
+  content: ''; 
+  position: absolute; 
+  inset: 0; 
+  background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px); 
+  background-size: 60px 60px; 
+  pointer-events: none; 
+}
+.page-hero::after { 
+  content: ''; 
+  position: absolute; 
+  top: -200px; 
+  right: -200px; 
+  width: 600px; 
+  height: 600px; 
+  background: radial-gradient(circle, rgba(19,70,160,.4) 0%, transparent 70%); 
+  pointer-events: none; 
+}
+.hero-inner { 
+  position: relative; 
+  z-index: 2; 
+  text-align: center; 
+  width: 100%;
+}
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 10px; font-family: var(--fs); font-size: .65rem; font-weight: 600; letter-spacing: .22em; text-transform: uppercase; color: var(--accent); margin-bottom: 20px; }
+.hero-eyebrow::before, .hero-eyebrow::after { content: ''; width: 28px; height: 2px; background: var(--accent); display: block; }
+.hero-title { font-family: var(--fs); font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; color: #fff; line-height: 1.06; letter-spacing: -.02em; margin-bottom: 16px; }
+.hero-title span { color: var(--accent); }
+.hero-sub { font-size: .95rem; color: rgba(255,255,255,.5); font-weight: 300; max-width: 520px; margin: 0 auto; line-height: 1.8; }
+
+.bc { background: rgba(255,255,255,.04); border-top: 1px solid rgba(255,255,255,.06); padding: 11px 0; margin-top: 60px; }
+.bc ol { list-style: none; display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+.bc li { font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; color: rgba(255,255,255,.3); display: flex; align-items: center; gap: 8px; }
+.bc li::before { content: '/'; color: rgba(255,255,255,.15); }
+.bc li:first-child::before { display: none; }
+.bc a { color: rgba(255,255,255,.5); text-decoration: none; }
+.bc a:hover { color: var(--accent); }
+.bc li.cur { color: var(--accent); }
+
+/* Rest of your CSS remains the same */
+.section { padding: 88px 0; }
+.section-white { background: #fff; }
+.section-steel { background: var(--steel); }
+.section-navy { background: var(--navy); }
+
+.sec-head { text-align: center; margin-bottom: 56px; }
+.sec-eye { display: inline-flex; align-items: center; gap: 8px; font-family: var(--fs); font-size: .65rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--blue); margin-bottom: 14px; }
+.sec-eye::before { content: ''; width: 20px; height: 2px; background: var(--blue); display: block; }
+.sec-eye.inv { color: var(--accent); }
+.sec-eye.inv::before { background: var(--accent); }
+.sec-title { font-family: var(--fs); font-size: clamp(2rem, 3.5vw, 2.8rem); font-weight: 800; line-height: 1.1; color: var(--navy); margin-bottom: 14px; }
+.sec-title span { color: var(--blue); }
+.sec-title.inv { color: #fff; }
+.sec-sub { font-size: .92rem; color: var(--gray); font-weight: 300; line-height: 1.8; max-width: 480px; margin: 0 auto; }
+.sec-sub.inv { color: rgba(255,255,255,.42); }
+
+/* services */
+.services-grid { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--border); }
+.svc-cell { padding: 44px 36px; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); transition: background .25s; display: flex; flex-direction: column; }
+.svc-cell:nth-child(3n) { border-right: none; }
+.svc-cell:hover { background: var(--steel); }
+.svc-icon { width: 54px; height: 54px; background: var(--navy); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--accent); margin-bottom: 22px; transition: all .3s; }
+.svc-cell:hover .svc-icon { background: var(--blue); }
+.svc-tag { font-family: var(--fs); font-size: .58rem; font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 8px; }
+.svc-name { font-family: var(--fs); font-size: 1.2rem; font-weight: 700; color: var(--navy); margin-bottom: 12px; }
+.svc-desc { font-size: .84rem; color: var(--gray); line-height: 1.75; margin-bottom: 20px; }
+.svc-list { list-style: none; margin-bottom: 22px; flex: 1; }
+.svc-list li { font-size: .8rem; color: var(--gray); padding: 7px 0; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+.svc-list li:last-child { border-bottom: none; }
+.svc-list li::before { content: ''; width: 6px; height: 6px; background: var(--accent); border-radius: 50%; flex-shrink: 0; }
+.svc-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 24px; }
+.svc-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; background: rgba(19,70,160,.08); border: 1px solid rgba(19,70,160,.15); color: var(--blue); font-family: var(--fs); font-size: .58rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+.btn-svc { display: inline-flex; align-items: center; gap: 8px; background: transparent; border: 1px solid var(--border); color: var(--gray); padding: 10px 20px; font-family: var(--fs); font-size: .62rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; text-decoration: none; transition: all .22s; align-self: flex-start; }
+.btn-svc:hover { border-color: var(--blue); color: var(--blue); }
+
+/* tech */
+.tech-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid rgba(255,255,255,.1); }
+.tech-cell { padding: 44px 28px; border-right: 1px solid rgba(255,255,255,.1); text-align: center; transition: background .25s; }
+.tech-cell:last-child { border-right: none; }
+.tech-cell:hover { background: rgba(255,255,255,.04); }
+.tech-icon { width: 60px; height: 60px; background: rgba(249,115,22,.15); border: 1px solid rgba(249,115,22,.25); display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 1.3rem; color: var(--accent); transition: all .3s; }
+.tech-cell:hover .tech-icon { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tech-name { font-family: var(--fs); font-size: .92rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+.tech-desc { font-size: .78rem; color: rgba(255,255,255,.38); line-height: 1.7; }
+
+/* certs */
+.cert-grid { display: grid; grid-template-columns: repeat(6, 1fr); border: 1px solid var(--border); }
+.cert-cell { padding: 32px 16px; border-right: 1px solid var(--border); text-align: center; transition: background .25s; }
+.cert-cell:last-child { border-right: none; }
+.cert-cell:hover { background: #fff; }
+.cert-icon { width: 48px; height: 48px; background: var(--navy); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 1rem; color: var(--accent); transition: all .3s; }
+.cert-cell:hover .cert-icon { background: var(--blue); }
+.cert-name { font-family: var(--fs); font-size: .75rem; font-weight: 700; color: var(--navy); margin-bottom: 5px; }
+.cert-sub { font-size: .7rem; color: var(--gray); line-height: 1.55; }
+.info-bar { border: 1px solid var(--border); border-left: 4px solid var(--blue); background: #fff; padding: 20px 24px; margin-top: 2px; display: flex; align-items: center; gap: 20px; }
+.info-bar i { color: var(--blue); font-size: 1.5rem; flex-shrink: 0; }
+.ib-title { font-family: var(--fs); font-size: .8rem; font-weight: 700; color: var(--navy); margin-bottom: 4px; }
+.ib-text { font-size: .78rem; color: var(--gray); line-height: 1.65; }
+
+/* process */
+.process-grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid rgba(255,255,255,.1); }
+.proc-cell { padding: 44px 32px; border-right: 1px solid rgba(255,255,255,.1); transition: background .25s; }
+.proc-cell:last-child { border-right: none; }
+.proc-cell:hover { background: rgba(255,255,255,.04); }
+.proc-num { font-family: var(--fs); font-size: 3.5rem; font-weight: 800; color: rgba(255,255,255,.06); line-height: 1; margin-bottom: 20px; }
+.proc-icon { width: 46px; height: 46px; background: rgba(249,115,22,.15); border: 1px solid rgba(249,115,22,.25); display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--accent); margin-bottom: 18px; transition: all .3s; }
+.proc-cell:hover .proc-icon { background: var(--accent); color: #fff; border-color: var(--accent); }
+.proc-name { font-family: var(--fs); font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+.proc-desc { font-size: .8rem; color: rgba(255,255,255,.42); line-height: 1.75; }
+.accent-bar { border: 1px solid rgba(255,255,255,.1); border-left: 4px solid var(--accent); background: rgba(255,255,255,.04); padding: 20px 24px; margin-top: 2px; display: flex; align-items: center; gap: 20px; }
+.accent-bar i { color: var(--accent); font-size: 1.5rem; flex-shrink: 0; }
+.ab-title { font-family: var(--fs); font-size: .8rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.ab-text { font-size: .78rem; color: rgba(255,255,255,.45); line-height: 1.65; }
+
+/* cta */
+.cta-bar { background: var(--blue); padding: 72px 0; position: relative; overflow: hidden; }
+.cta-bar::after { content: ''; position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 70%); pointer-events: none; }
+.cta-inner { display: flex; align-items: center; justify-content: space-between; gap: 32px; flex-wrap: wrap; position: relative; z-index: 2; }
+.cta-title { font-family: var(--fs); font-size: clamp(1.8rem, 3.5vw, 2.6rem); font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.1; }
+.cta-sub { font-size: .9rem; color: rgba(255,255,255,.55); font-weight: 300; margin-bottom: 20px; }
+.cta-metrics { display: flex; gap: 28px; flex-wrap: wrap; }
+.cta-metric { display: flex; align-items: center; gap: 8px; font-size: .8rem; color: rgba(255,255,255,.65); }
+.cta-metric i { color: var(--accent); }
+.btn-cta { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: var(--blue); border: 2px solid #fff; padding: 15px 36px; font-family: var(--fs); font-size: .75rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; text-decoration: none; transition: all .25s; white-space: nowrap; }
+.btn-cta:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cta-note { font-size: .72rem; color: rgba(255,255,255,.35); margin-top: 10px; }
+
+@media (max-width: 1199px) {
+  .cert-grid { grid-template-columns: repeat(3, 1fr); }
+  .cert-cell:nth-child(3) { border-right: none; }
+  .cert-cell:nth-child(4) { border-top: 1px solid var(--border); }
+}
+@media (max-width: 1023px) {
+  .services-grid { grid-template-columns: repeat(2, 1fr); }
+  .svc-cell:nth-child(2n) { border-right: none; }
+  .tech-grid { grid-template-columns: repeat(2, 1fr); }
+  .tech-cell:nth-child(2n) { border-right: none; }
+  .tech-cell:nth-child(3) { border-top: 1px solid rgba(255,255,255,.1); }
+  .process-grid { grid-template-columns: repeat(2, 1fr); }
+  .proc-cell:nth-child(2n) { border-right: none; }
+  .proc-cell:nth-child(3) { border-top: 1px solid rgba(255,255,255,.1); }
+}
+@media (max-width: 767px) {
+  .section { padding: 60px 0; }
+  .services-grid, .tech-grid, .process-grid, .cert-grid { grid-template-columns: 1fr; }
+  .svc-cell, .cert-cell { border-right: none; border-bottom: 1px solid var(--border); }
+  .svc-cell:last-child, .cert-cell:last-child { border-bottom: none; }
+  .tech-cell { border-right: none; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .tech-cell:last-child { border-bottom: none; }
+  .proc-cell { border-right: none; border-bottom: 1px solid rgba(255,255,255,.1); }
+  .proc-cell:last-child { border-bottom: none; }
+  .cta-inner { flex-direction: column; align-items: flex-start; }
+  .page-hero { 
+    padding: 80px 0 60px;
+    min-height: auto;
+  }
+  .bc {
+    margin-top: 40px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+  <div class="container hero-inner">
+    <span class="hero-eyebrow">What We Offer</span>
+    <h1 class="hero-title">Enterprise Logistics <span>Solutions</span></h1>
+    <p class="hero-sub">End-to-end supply chain services powered by cutting-edge technology and global expertise.</p>
+  </div>
+  <div class="bc">
+    <div class="container">
+      <ol>
+        <li><a href="/">Home</a></li>
+        <li class="cur">Services</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- Rest of your content remains the same -->
+<section class="section section-white">
+  <div class="container">
+    <div class="sec-head">
+      <span class="sec-eye">Our Capabilities</span>
+      <h2 class="sec-title">Full-Spectrum <span>Logistics</span></h2>
+      <p class="sec-sub">Purpose-built solutions for every stage of your supply chain.</p>
+    </div>
+    <div class="services-grid">
+      <!-- Your service cards here (same as before) -->
+      {% if services %}
+        {% for service in services %}
+        <div class="svc-cell">
+          <div class="svc-icon"><i class="{{ service.icon_class }}"></i></div>
+          <span class="svc-tag">Service</span>
+          <h3 class="svc-name">{{ service.title }}</h3>
+          <p class="svc-desc">{{ service.description }}</p>
+          <ul class="svc-list">
+            {% for feature in service.features.all %}
+            <li>{{ feature.title }}</li>
+            {% empty %}
+            <li>Real-time tracking</li>
+            <li>Dedicated support</li>
+            <li>Customised solutions</li>
+            {% endfor %}
+          </ul>
+          <a href="{% url 'services' %}" class="btn-svc">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+        {% endfor %}
+      {% else %}
+        <!-- Default service cards -->
+        <div class="svc-cell">
+          <div class="svc-icon"><i class="fas fa-shipping-fast"></i></div>
+          <span class="svc-tag">Express</span>
+          <h3 class="svc-name">Express Delivery</h3>
+          <p class="svc-desc">AI-optimized express shipping with predictive delivery windows and priority handling.</p>
+          <ul class="svc-list">
+            <li>Same-day delivery options</li>
+            <li>Real-time GPS tracking</li>
+            <li>Predictive ETA accuracy 98%</li>
+            <li>Priority handling systems</li>
+            <li>Automated exception management</li>
+          </ul>
+          <div class="svc-badges">
+            <span class="svc-badge"><i class="fas fa-bolt"></i> Fast</span>
+            <span class="svc-badge"><i class="fas fa-shield-alt"></i> Secure</span>
+            <span class="svc-badge"><i class="fas fa-chart-line"></i> Tracked</span>
+          </div>
+          <a href="{% url 'services' %}" class="btn-svc">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="svc-cell">
+          <div class="svc-icon"><i class="fas fa-warehouse"></i></div>
+          <span class="svc-tag">Storage</span>
+          <h3 class="svc-name">Smart Warehousing</h3>
+          <p class="svc-desc">IoT-enabled storage with robotic automation and real-time inventory management.</p>
+          <ul class="svc-list">
+            <li>IoT temperature monitoring</li>
+            <li>Robotic picking systems</li>
+            <li>Real-time inventory visibility</li>
+            <li>Climate-controlled zones</li>
+            <li>Automated order fulfilment</li>
+          </ul>
+          <div class="svc-badges">
+            <span class="svc-badge"><i class="fas fa-robot"></i> Automated</span>
+            <span class="svc-badge"><i class="fas fa-thermometer-half"></i> Climate</span>
+            <span class="svc-badge"><i class="fas fa-wifi"></i> IoT</span>
+          </div>
+          <a href="{% url 'services' %}" class="btn-svc">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="svc-cell">
+          <div class="svc-icon"><i class="fas fa-globe-americas"></i></div>
+          <span class="svc-tag">International</span>
+          <h3 class="svc-name">Global Trade Solutions</h3>
+          <p class="svc-desc">End-to-end international logistics with automated customs clearance and compliance.</p>
+          <ul class="svc-list">
+            <li>Automated customs brokerage</li>
+            <li>Multi-modal transport network</li>
+            <li>Compliance management</li>
+            <li>Duty &amp; tax optimisation</li>
+            <li>Door-to-door delivery</li>
+          </ul>
+          <div class="svc-badges">
+            <span class="svc-badge"><i class="fas fa-plane"></i> Air</span>
+            <span class="svc-badge"><i class="fas fa-ship"></i> Sea</span>
+            <span class="svc-badge"><i class="fas fa-passport"></i> Customs</span>
+          </div>
+          <a href="{% url 'services' %}" class="btn-svc">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="svc-cell">
+          <div class="svc-icon"><i class="fas fa-temperature-low"></i></div>
+          <span class="svc-tag">Pharma &amp; Food</span>
+          <h3 class="svc-name">Cold Chain Logistics</h3>
+          <p class="svc-desc">Temperature-controlled solutions for pharmaceuticals, food, and sensitive products.</p>
+          <ul class="svc-list">
+            <li>2–8°C temperature control</li>
+            <li>Real-time temperature monitoring</li>
+            <li>Validated packaging solutions</li>
+            <li>GDP compliance</li>
+            <li>24/7 temperature alerts</li>
+          </ul>
+          <div class="svc-badges">
+            <span class="svc-badge"><i class="fas fa-snowflake"></i> Cold Chain</span>
+            <span class="svc-badge"><i class="fas fa-prescription-bottle"></i> Pharma</span>
+            <span class="svc-badge"><i class="fas fa-utensils"></i> Food Grade</span>
+          </div>
+          <a href="{% url 'services' %}" class="btn-svc">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="svc-cell">
+          <div class="svc-icon"><i class="fas fa-boxes"></i></div>
+          <span class="svc-tag">AI-Powered</span>
+          <h3 class="svc-name">Supply Chain Management</h3>
+          <p class="svc-desc">AI-powered supply chain optimisation with predictive analytics and risk management.</p>
+          <ul class="svc-list">
+            <li>Demand forecasting</li>
+            <li>Inventory optimisation</li>
+            <li>Supplier management</li>
+            <li>Risk assessment</li>
+            <li>Performance analytics</li>
+          </ul>
+          <div class="svc-badges">
+            <span class="svc-badge"><i class="fas fa-brain"></i> AI</span>
+            <span class="svc-badge"><i class="fas fa-chart-line"></i> Analytics</span>
+            <span class="svc-badge"><i class="fas fa-shield-alt"></i> Risk</span>
+          </div>
+          <a href="{% url 'services' %}" class="btn-svc">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+        <div class="svc-cell">
+          <div class="svc-icon"><i class="fas fa-truck-loading"></i></div>
+          <span class="svc-tag">Heavy Cargo</span>
+          <h3 class="svc-name">Specialised Freight</h3>
+          <p class="svc-desc">Heavy cargo and specialised transport solutions with deep industry expertise.</p>
+          <ul class="svc-list">
+            <li>Oversized cargo handling</li>
+            <li>Dangerous goods transport</li>
+            <li>Project cargo management</li>
+            <li>Heavy lift capabilities</li>
+            <li>Special permits management</li>
+          </ul>
+          <div class="svc-badges">
+            <span class="svc-badge"><i class="fas fa-weight-hanging"></i> Heavy</span>
+            <span class="svc-badge"><i class="fas fa-radiation"></i> Hazardous</span>
+            <span class="svc-badge"><i class="fas fa-cogs"></i> Specialised</span>
+          </div>
+          <a href="{% url 'services' %}" class="btn-svc">Learn More <i class="fas fa-arrow-right"></i></a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Continue with the rest of your sections (Technology, Certifications, Process, CTA) -->
+<!-- They remain the same as in your original code -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.svc-cell, .proc-cell, .tech-cell, .cert-cell').forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(16px)';
+    el.style.transition = `opacity .5s ease ${i * 0.05}s, transform .5s ease ${i * 0.05}s`;
+    observer.observe(el);
+  });
+});
+</script>
+{% endblock %}
