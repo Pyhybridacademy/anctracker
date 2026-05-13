@@ -13,7 +13,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-default-key-for-developmen
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 # Host configuration
-ALLOWED_HOSTS = 'anctracker.onrender.com,localhost,127.0.0.1',
+ALLOWED_HOSTS = ['anctracker.onrender.com', 'localhost', '127.0.0.1']
 CSRF_TRUSTED_ORIGINS = [
 "https://anctracker.onrender.com",
 ]
